@@ -8,6 +8,7 @@ type Ferry struct {
 	config    *Config
 	routerMap map[string][]router
 	middleware []handler
+	groupMiddlewareMap map[string][]handler
 }
 
 // Init server
@@ -16,6 +17,7 @@ func InitServer(config *Config) *Ferry {
 		config:    config,
 		routerMap: map[string][]router{},
 		middleware: []handler{},
+		groupMiddlewareMap: map[string][]handler{},
 	}
 }
 
@@ -56,3 +58,4 @@ func (ferry *Ferry) Group (path string) *group {
 		ferry: ferry,
 	}
 }
+

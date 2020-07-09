@@ -17,6 +17,8 @@ type router struct {
 type group struct {
 	path string
 	ferry *Ferry
+	middleware []handler
+	middlewareCurrentIndex int
 }
 
 var (
@@ -42,11 +44,16 @@ func (g *group) Post(path string, h handler) {
 	g.addRoute(post, path, h)
 }
 
+func (g *group) Use (h handler) {
+	g.ferry.groupMiddlewareMap[g.path] = append(g.ferry.groupMiddlewareMap[g.path], h)
+}
+
 // Group method
 func (g *group) Group (path string) *group {
 	return &group{
 		path: fmt.Sprintf("%s%s", g.path, path),
 		ferry: g.ferry,
+		middleware: []handler{},
 	}
 }
 
@@ -61,44 +68,15 @@ func handlerRouterError(err error, w http.ResponseWriter) {
 	_, _ = fmt.Fprint(w, err.Error())
 }
 
-func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
-	if len(ferry.middleware) > 0 {
-		ctx.appMiddlewareIndex = 0
-		var next func() error
-		next = func() error {
-			ctx.appMiddlewareIndex = ctx.appMiddlewareIndex + 1
-			if ctx.appMiddlewareIndex != len(ferry.middleware) {
-				handler := ferry.middleware[ctx.appMiddlewareIndex]
-				if err := handler(ctx); err != nil {
-					handlerRouterError(err, ctx.Writer)
-				}
-			} else {
-				handleRouting(ferry, ctx)
-			}
-			return nil
-		}
-		handler := ferry.middleware[ctx.appMiddlewareIndex]
-		ctx.Next = next
-		if err := handler(ctx); err != nil {
-			handlerRouterError(err, ctx.Writer)
-		}
-	}
-}
 
 func handleRouting(ferry *Ferry, ctx *Ctx) {
 	// first get handler by method
 	routesByMethod := ferry.routerMap[ctx.Request.Method]
 	if routesByMethod != nil {
-		// get handler by path
-		for _, route := range routesByMethod {
-			if route.path == ctx.Request.URL.Path {
-				if err := route.handler(ctx); err != nil {
-					handlerRouterError(err, ctx.Writer)
-				}
-				return
-			}
-		}
+		groupLevelMiddleware(ctx, ferry, routesByMethod)
+	} else {
+		// run 404
+		handle404(ctx.Writer)
 	}
-	// run 404
-	handle404(ctx.Writer)
+
 }

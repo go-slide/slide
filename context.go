@@ -15,11 +15,7 @@ type Ctx struct {
 	Next func() error
 	config  *Config
 	appMiddlewareIndex int
-	//OnNext                        func() error
-	//AppMiddlewareCount            int
-	//CurrentAppMiddlewareCount     int
-	//GroupedMiddlewareCount        int
-	//GroupedMiddlewareCurrentCount int
+	groupMiddlewareIndex int
 }
 
 // Sending application/json response
