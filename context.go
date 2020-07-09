@@ -12,7 +12,9 @@ type Ctx struct {
 	Writer  http.ResponseWriter
 	Request *http.Request
 	Context context.Context
+	Next func() error
 	config  *Config
+	appMiddlewareIndex int
 	//OnNext                        func() error
 	//AppMiddlewareCount            int
 	//CurrentAppMiddlewareCount     int

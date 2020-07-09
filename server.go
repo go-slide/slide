@@ -7,6 +7,7 @@ import (
 type Ferry struct {
 	config    *Config
 	routerMap map[string][]router
+	middleware []handler
 }
 
 // Init server
@@ -14,12 +15,14 @@ func InitServer(config *Config) *Ferry {
 	return &Ferry{
 		config:    config,
 		routerMap: map[string][]router{},
+		middleware: []handler{},
 	}
 }
 
 func (ferry *Ferry) Listen(host string) error {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		handleRouting(ferry, writer, request)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := getRouterContext(w, r, ferry)
+		appLevelMiddleware(ctx, ferry)
 	})
 	return http.ListenAndServe(host, nil)
 }
@@ -29,6 +32,11 @@ func (ferry *Ferry) addRoute(method,path string, h handler) {
 		path:    path,
 		handler: h,
 	})
+}
+
+// application level middleware
+func (ferry *Ferry) Use(h handler) {
+	ferry.middleware = append(ferry.middleware, h)
 }
 
 // Get method of ferry

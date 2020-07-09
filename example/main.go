@@ -20,6 +20,16 @@ func main() {
 	}
 	app := ferry.InitServer(&config)
 
+	app.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("hey!, this is middleware")
+		return ctx.Next()
+	})
+	// un comment below code to see early response from middleware
+	//app.Use(func(ctx *ferry.Ctx) error {
+	//	fmt.Println("Early response from middleware")
+	//	return ctx.Send(http.StatusOK, "From app middleware")
+	//})
+
 	app.Get("/", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World!")
 	})

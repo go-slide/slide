@@ -61,21 +61,44 @@ func handlerRouterError(err error, w http.ResponseWriter) {
 	_, _ = fmt.Fprint(w, err.Error())
 }
 
-func handleRouting(ferry *Ferry, w http.ResponseWriter, r *http.Request) {
+func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
+	if len(ferry.middleware) > 0 {
+		ctx.appMiddlewareIndex = 0
+		var next func() error
+		next = func() error {
+			ctx.appMiddlewareIndex = ctx.appMiddlewareIndex + 1
+			if ctx.appMiddlewareIndex != len(ferry.middleware) {
+				handler := ferry.middleware[ctx.appMiddlewareIndex]
+				if err := handler(ctx); err != nil {
+					handlerRouterError(err, ctx.Writer)
+				}
+			} else {
+				handleRouting(ferry, ctx)
+			}
+			return nil
+		}
+		handler := ferry.middleware[ctx.appMiddlewareIndex]
+		ctx.Next = next
+		if err := handler(ctx); err != nil {
+			handlerRouterError(err, ctx.Writer)
+		}
+	}
+}
+
+func handleRouting(ferry *Ferry, ctx *Ctx) {
 	// first get handler by method
-	routesByMethod := ferry.routerMap[r.Method]
-	ctx := getRouterContext(w, r, ferry)
+	routesByMethod := ferry.routerMap[ctx.Request.Method]
 	if routesByMethod != nil {
 		// get handler by path
 		for _, route := range routesByMethod {
-			if route.path == r.URL.Path {
+			if route.path == ctx.Request.URL.Path {
 				if err := route.handler(ctx); err != nil {
-					handlerRouterError(err, w)
+					handlerRouterError(err, ctx.Writer)
 				}
 				return
 			}
 		}
 	}
 	// run 404
-	handle404(w)
+	handle404(ctx.Writer)
 }
