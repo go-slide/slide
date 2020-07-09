@@ -25,11 +25,11 @@ func main() {
 	}
 	app := ferry.InitServer(&config)
 
-	app.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("hey!, this is middleware")
-		return ctx.Next()
-	})
-	// uncomment below code to see early response from middleware
+	//app.Use(func(ctx *ferry.Ctx) error {
+	//	fmt.Println("hey!, this is middleware")
+	//	return ctx.Next()
+	//})
+	// un comment below code to see early response from middleware
 	//app.Use(func(ctx *ferry.Ctx) error {
 	//	fmt.Println("Early response from middleware")
 	//	return ctx.Send(http.StatusOK, "From app middleware")
@@ -60,15 +60,20 @@ func main() {
 
 	// group routing
 	auth := app.Group("/auth")
+	auth.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("this is auth level middleware")
+		return ctx.Next()
+	})
+
+	//// un comment below code for early response from middleware
+	//auth.Use(func(ctx *ferry.Ctx) error {
+	//	fmt.Println("this is auth level middleware2")
+	//	return ctx.Send(http.StatusOK, "response from auth middleware")
+	//})
+
 	auth.Get("/signup", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Registered")
 	})
-
-	// you can make nested groups as well
-	auth.Group("/doubleauth").Get("/signup", func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusOK, "double")
-	})
-
 	log.Fatal(app.Listen("localhost:3000"))
 }
 
