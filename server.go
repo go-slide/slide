@@ -1,7 +1,9 @@
 package ferry
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Ferry struct {
@@ -58,5 +60,30 @@ func (ferry *Ferry) Group(path string) *group {
 	return &group{
 		path:  path,
 		ferry: ferry,
+	}
+}
+
+// Serving
+func (ferry *Ferry) ServeFile (path, fileName string) {
+	ferry.Get(path, func(ctx *Ctx) error {
+		http.ServeFile(ctx.Writer, ctx.Request, fileName)
+		return nil
+	})
+}
+
+func (ferry *Ferry) ServerDir (path, dir string)  {
+	var paths []string
+	if err := getAllPaths(dir, &paths); err != nil {
+		panic(err)
+	}
+	ferry.Get(path, func(ctx *Ctx) error {
+		indexFile := fmt.Sprintf("%s%s", dir, "/index.html")
+		http.ServeFile(ctx.Writer, ctx.Request, indexFile)
+		return nil
+	})
+	for _, p := range paths {
+		// replace dir name
+		filePath := strings.Replace(p, dir, "", 1)
+		ferry.ServeFile(filePath, p)
 	}
 }
