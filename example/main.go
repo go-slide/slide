@@ -32,9 +32,9 @@ func main() {
 	//	return ctx.Send(http.StatusOK, "From app middleware")
 	//})
 
-	app.Get("/", func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusOK, "Hello, World!")
-	})
+	//app.Get("/", func(ctx *ferry.Ctx) error {
+	//	return ctx.Send(http.StatusOK, "Hello, World!")
+	//})
 
 	app.Get("/login", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World!, This is login")
@@ -100,5 +100,9 @@ func main() {
 	dashboardPrivate.Get("/all", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "private all")
 	})
+
+	app.ServeFile("/js", "static/login.js")
+	app.ServerDir("/", "static")
+
 	log.Fatal(app.Listen("localhost:3000"))
 }
