@@ -56,7 +56,7 @@ func main() {
 	// group routing
 	auth := app.Group("/auth")
 	auth.Use(func(ctx *ferry.Ctx) error {
-		//fmt.Println("this is auth level middleware")
+		fmt.Println("this is auth level middleware")
 		return ctx.Next()
 	})
 
@@ -66,12 +66,37 @@ func main() {
 	//	return ctx.Send(http.StatusOK, "response from auth middleware")
 	//})
 
-	auth.Get("/:signup", func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusOK, "Registered")
+	auth.Get("/:name", func(ctx *ferry.Ctx) error {
+		name := ctx.GetParam("name")
+		return ctx.Send(http.StatusOK, fmt.Sprintf("Welcome %s", name))
 	})
 
-	auth.Get("/:signup/lol", func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusOK, "Registered with lol")
+	auth.Get("/:name/lol", func(ctx *ferry.Ctx) error {
+		name := ctx.GetParam("name")
+		return ctx.Send(http.StatusOK, fmt.Sprintf("Registered %s with lol", name))
+	})
+
+	auth.Get("/:name/:age", func(ctx *ferry.Ctx) error {
+		params := ctx.GetParams()
+		return ctx.Json(http.StatusOK, params)
+	})
+
+	dashBoard := app.Group("/dashboard")
+	dashBoard.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("dashboard")
+		return ctx.Next()
+	})
+	dashBoard.Get("/all", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "all")
+	})
+	// nested routes
+	dashboardPrivate := dashBoard.Group("/private")
+	dashboardPrivate.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("dashboard private")
+		return ctx.Next()
+	})
+	dashboardPrivate.Get("/all", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "private all")
 	})
 	log.Fatal(app.Listen("localhost:3000"))
 }

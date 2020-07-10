@@ -11,15 +11,15 @@ import (
 type handler func(ctx *Ctx) error
 
 type router struct {
-	path    string
-	handler handler
+	routerPath string
+	regexPath  string
+	handler    handler
 }
 
-
 type group struct {
-	path string
-	ferry *Ferry
-	middleware []handler
+	path                   string
+	ferry                  *Ferry
+	middleware             []handler
 	middlewareCurrentIndex int
 }
 
@@ -28,14 +28,15 @@ var (
 	post = "POST"
 )
 
-var routerRegexReplace = "[a-zA-Z0-9]*"
+var routerRegexReplace = "[a-zA-Z0-9_-]*"
 
-func (g *group) addRoute(method,path string, h handler) {
+func (g *group) addRoute(method, path string, h handler) {
 	groupPath := fmt.Sprintf("%s%s", g.path, path)
 	pathWithRegex := findAndReplace(groupPath)
 	g.ferry.routerMap[method] = append(g.ferry.routerMap[method], router{
-		path:    pathWithRegex,
-		handler: h,
+		routerPath: groupPath,
+		regexPath:  pathWithRegex,
+		handler:    h,
 	})
 }
 
@@ -49,15 +50,15 @@ func (g *group) Post(path string, h handler) {
 	g.addRoute(post, path, h)
 }
 
-func (g *group) Use (h handler) {
+func (g *group) Use(h handler) {
 	g.ferry.groupMiddlewareMap[g.path] = append(g.ferry.groupMiddlewareMap[g.path], h)
 }
 
 // Group method
-func (g *group) Group (path string) *group {
+func (g *group) Group(path string) *group {
 	return &group{
-		path: fmt.Sprintf("%s%s", g.path, path),
-		ferry: g.ferry,
+		path:       fmt.Sprintf("%s%s", g.path, path),
+		ferry:      g.ferry,
 		middleware: []handler{},
 	}
 }
@@ -72,7 +73,6 @@ func handlerRouterError(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
 	_, _ = fmt.Fprint(w, err.Error())
 }
-
 
 func handleRouting(ferry *Ferry, ctx *Ctx) {
 	// first get handler by method
@@ -111,13 +111,13 @@ func findAndReplace(path string) string {
 	return result
 }
 
-
 // calls actual handler
-func handleRouter(ctx *Ctx, ferry *Ferry, routers []router)  {
+func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 	urlPath := ctx.Request.URL.Path
 	for _, route := range routers {
-		match, _ := regexp.MatchString(route.path, urlPath)
+		match, _ := regexp.MatchString(route.regexPath, urlPath)
 		if match {
+			ctx.routerPath = route.routerPath
 			if err := route.handler(ctx); err != nil {
 				handlerRouterError(err, ctx.Writer)
 			}
@@ -125,4 +125,39 @@ func handleRouter(ctx *Ctx, ferry *Ferry, routers []router)  {
 		}
 	}
 	handle404(ctx.Writer)
+}
+
+// routerPath /auth/:name
+// requestPath /auth/madhuri
+// paramName name
+// returns madhuri
+func extractParamFromPath(routerPath,requestPath,paramName string) string {
+	routerSplit := strings.Split(routerPath, "/")
+	requestSplit := strings.Split(requestPath, "/")
+	if len(routerSplit) != len(requestSplit) {
+		return ""
+	}
+	paramWithWildCard := fmt.Sprintf(":%s",paramName)
+	for k, v := range routerSplit {
+		if v == paramWithWildCard {
+			return requestSplit[k]
+		}
+	}
+	return ""
+}
+
+// routerPath /auth/:name/:age
+// requestPath /auth/madhuri/32
+// returns { name: madhuri, age: 32 }
+func getParamsFromPath(routerPath,requestPath string) map[string]string {
+	paramsMap := map[string]string{}
+	routerSplit := strings.Split(routerPath, "/")
+	requestSplit := strings.Split(requestPath, "/")
+	for k, v := range routerSplit {
+		if strings.Contains(v, ":") {
+			key := strings.ReplaceAll(v, ":", "")
+			paramsMap[key] = requestSplit[k]
+		}
+	}
+	return paramsMap
 }
