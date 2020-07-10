@@ -71,7 +71,7 @@ func handle404(w http.ResponseWriter) {
 
 func handlerRouterError(err error, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
-	_, _ = fmt.Fprint(w, err.Error())
+	_, _ = w.Write([]byte(err.Error()))
 }
 
 func handleRouting(ferry *Ferry, ctx *Ctx) {

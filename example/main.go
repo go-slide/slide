@@ -2,11 +2,11 @@ package main
 
 import (
 	"ferry"
-	"ferry/middleware"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Login struct {
@@ -20,7 +20,7 @@ func main() {
 		Validator: validate,
 	}
 	app := ferry.InitServer(&config)
-	app.Use(middleware.Gzip())
+	//app.Use(middleware.Gzip())
 
 	//app.Use(func(ctx *ferry.Ctx) error {
 	//	fmt.Println("hey!, this is middleware")
