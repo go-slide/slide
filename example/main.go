@@ -56,7 +56,7 @@ func main() {
 	// group routing
 	auth := app.Group("/auth")
 	auth.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("this is auth level middleware")
+		//fmt.Println("this is auth level middleware")
 		return ctx.Next()
 	})
 
@@ -66,8 +66,12 @@ func main() {
 	//	return ctx.Send(http.StatusOK, "response from auth middleware")
 	//})
 
-	auth.Get("/signup", func(ctx *ferry.Ctx) error {
+	auth.Get("/:signup", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Registered")
+	})
+
+	auth.Get("/:signup/lol", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "Registered with lol")
 	})
 	log.Fatal(app.Listen("localhost:3000"))
 }
