@@ -10,7 +10,7 @@ import (
 
 type Ctx struct {
 	Writer               http.ResponseWriter
-	GzipWriter 			 *gzip.Writer
+	GzipWriter           *gzip.Writer
 	Request              *http.Request
 	Context              context.Context
 	Next                 func() error

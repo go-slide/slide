@@ -5,7 +5,7 @@ import (
 	"ferry"
 )
 
-func Gzip() func (ctx *ferry.Ctx) error {
+func Gzip() func(ctx *ferry.Ctx) error {
 	return func(ctx *ferry.Ctx) error {
 		writer, err := gzip.NewWriterLevel(ctx.Writer, gzip.BestCompression)
 		if err != nil {

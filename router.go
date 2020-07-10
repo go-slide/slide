@@ -131,13 +131,13 @@ func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 // requestPath /auth/madhuri
 // paramName name
 // returns madhuri
-func extractParamFromPath(routerPath,requestPath,paramName string) string {
+func extractParamFromPath(routerPath, requestPath, paramName string) string {
 	routerSplit := strings.Split(routerPath, "/")
 	requestSplit := strings.Split(requestPath, "/")
 	if len(routerSplit) != len(requestSplit) {
 		return ""
 	}
-	paramWithWildCard := fmt.Sprintf(":%s",paramName)
+	paramWithWildCard := fmt.Sprintf(":%s", paramName)
 	for k, v := range routerSplit {
 		if v == paramWithWildCard {
 			return requestSplit[k]
@@ -149,7 +149,7 @@ func extractParamFromPath(routerPath,requestPath,paramName string) string {
 // routerPath /auth/:name/:age
 // requestPath /auth/madhuri/32
 // returns { name: madhuri, age: 32 }
-func getParamsFromPath(routerPath,requestPath string) map[string]string {
+func getParamsFromPath(routerPath, requestPath string) map[string]string {
 	paramsMap := map[string]string{}
 	routerSplit := strings.Split(routerPath, "/")
 	requestSplit := strings.Split(requestPath, "/")
