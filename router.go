@@ -3,6 +3,8 @@ package ferry
 import (
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 )
 
 // Middleware/Route Handler
@@ -26,10 +28,13 @@ var (
 	post = "POST"
 )
 
+var routerRegexReplace = "[a-zA-Z0-9]*"
+
 func (g *group) addRoute(method,path string, h handler) {
 	groupPath := fmt.Sprintf("%s%s", g.path, path)
+	pathWithRegex := findAndReplace(groupPath)
 	g.ferry.routerMap[method] = append(g.ferry.routerMap[method], router{
-		path:    groupPath,
+		path:    pathWithRegex,
 		handler: h,
 	})
 }
@@ -79,4 +84,45 @@ func handleRouting(ferry *Ferry, ctx *Ctx) {
 		handle404(ctx.Writer)
 	}
 
+}
+
+// Finds wild card in URL and replace them with a regex for,
+// ex if path is /auth/:name -> /auth/[a-zA-Z0-9]*
+// ex if path is /auth/name -> /auth/name
+func findAndReplace(path string) string {
+	if !strings.Contains(path, ":") {
+		return fmt.Sprintf("%s%s%s", "^", path, "$")
+	}
+	result := ""
+	slitted := strings.Split(path, "/")
+	for _, v := range slitted {
+		if v == "" {
+			continue
+		}
+		if strings.Contains(v, ":") {
+			result = fmt.Sprintf("%s/%s", result, routerRegexReplace)
+			continue
+		}
+		result = fmt.Sprintf("%s/%s", result, v)
+	}
+	// replace slashes
+	result = strings.ReplaceAll(result, "/", "\\/")
+	result = fmt.Sprintf("%s%s%s", "^", result, "$")
+	return result
+}
+
+
+// calls actual handler
+func handleRouter(ctx *Ctx, ferry *Ferry, routers []router)  {
+	urlPath := ctx.Request.URL.Path
+	for _, route := range routers {
+		match, _ := regexp.MatchString(route.path, urlPath)
+		if match {
+			if err := route.handler(ctx); err != nil {
+				handlerRouterError(err, ctx.Writer)
+			}
+			return
+		}
+	}
+	handle404(ctx.Writer)
 }

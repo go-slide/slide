@@ -29,17 +29,6 @@ func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
 	}
 }
 
-func handleRouter(ctx *Ctx, ferry *Ferry, routers []router)  {
-	for _, route := range routers {
-		if route.path == ctx.Request.URL.Path {
-			if err := route.handler(ctx); err != nil {
-				handlerRouterError(err, ctx.Writer)
-			}
-			break
-		}
-	}
-}
-
 func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 	path := ctx.Request.URL.Path
 	// check if path is available in group middleware

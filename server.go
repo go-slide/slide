@@ -30,8 +30,9 @@ func (ferry *Ferry) Listen(host string) error {
 }
 
 func (ferry *Ferry) addRoute(method,path string, h handler) {
+	pathWithRegex := findAndReplace(path)
 	ferry.routerMap[method] = append(ferry.routerMap[method], router{
-		path:    path,
+		path:    pathWithRegex,
 		handler: h,
 	})
 }
