@@ -9,13 +9,14 @@ import (
 )
 
 type Ctx struct {
-	Writer  http.ResponseWriter
-	Request *http.Request
-	Context context.Context
-	Next func() error
-	config  *Config
-	appMiddlewareIndex int
+	Writer               http.ResponseWriter
+	Request              *http.Request
+	Context              context.Context
+	Next                 func() error
+	config               *Config
+	appMiddlewareIndex   int
 	groupMiddlewareIndex int
+	routerPath           string
 }
 
 // Sending application/json response
@@ -52,6 +53,14 @@ func (ctx *Ctx) Bind(input interface{}) error {
 		}
 	}
 	return nil
+}
+
+func (ctx *Ctx) GetParam(name string) string {
+	return extractParamFromPath(ctx.routerPath, ctx.Request.URL.Path, name)
+}
+
+func (ctx *Ctx) GetParams() map[string]string {
+	return getParamsFromPath(ctx.routerPath, ctx.Request.URL.Path)
 }
 
 func getRouterContext(w http.ResponseWriter, r *http.Request, ferry *Ferry) *Ctx {

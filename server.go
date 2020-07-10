@@ -5,18 +5,18 @@ import (
 )
 
 type Ferry struct {
-	config    *Config
-	routerMap map[string][]router
-	middleware []handler
+	config             *Config
+	routerMap          map[string][]router
+	middleware         []handler
 	groupMiddlewareMap map[string][]handler
 }
 
 // Init server
 func InitServer(config *Config) *Ferry {
 	return &Ferry{
-		config:    config,
-		routerMap: map[string][]router{},
-		middleware: []handler{},
+		config:             config,
+		routerMap:          map[string][]router{},
+		middleware:         []handler{},
 		groupMiddlewareMap: map[string][]handler{},
 	}
 }
@@ -29,11 +29,12 @@ func (ferry *Ferry) Listen(host string) error {
 	return http.ListenAndServe(host, nil)
 }
 
-func (ferry *Ferry) addRoute(method,path string, h handler) {
+func (ferry *Ferry) addRoute(method, path string, h handler) {
 	pathWithRegex := findAndReplace(path)
 	ferry.routerMap[method] = append(ferry.routerMap[method], router{
-		path:    pathWithRegex,
-		handler: h,
+		routerPath: path,
+		regexPath:  pathWithRegex,
+		handler:    h,
 	})
 }
 
@@ -53,10 +54,9 @@ func (ferry *Ferry) Post(path string, h handler) {
 }
 
 // Group method
-func (ferry *Ferry) Group (path string) *group {
+func (ferry *Ferry) Group(path string) *group {
 	return &group{
-		path: path,
+		path:  path,
 		ferry: ferry,
 	}
 }
-
