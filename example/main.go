@@ -22,7 +22,7 @@ func main() {
 	app := ferry.InitServer(&config)
 
 	notFoundHandler := func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusNotFound, "Check the URL")
+		return ctx.Redirect(http.StatusMovedPermanently, "http://localhost:3000")
 	}
 
 	app.HandleNotFound(notFoundHandler)
@@ -122,7 +122,7 @@ func main() {
 		return ctx.Send(http.StatusOK, "private all")
 	})
 
-	app.ServeFile("/js", "static/login.js")
+	app.ServeFile("/js", "static/js/login.js")
 	app.ServerDir("/", "static")
 
 	log.Fatal(app.Listen("localhost:3000"))
