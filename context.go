@@ -46,6 +46,14 @@ func (ctx *Ctx) Send(statusCode int, payload string) error {
 	return err
 }
 
+// redirect to new urls
+// reference https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections#Temporary_redirections
+// status codes between 300-308
+func (ctx *Ctx) Redirect(statusCode int, url string) error {
+	http.Redirect(ctx.Writer, ctx.Request, url, statusCode)
+	return nil
+}
+
 // Deserialize body to struct
 func (ctx *Ctx) Bind(input interface{}) error {
 	data, err := ioutil.ReadAll(ctx.Request.Body)
