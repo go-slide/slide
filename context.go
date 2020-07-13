@@ -4,8 +4,10 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 type Ctx struct {
@@ -46,11 +48,31 @@ func (ctx *Ctx) Send(statusCode int, payload string) error {
 	return err
 }
 
-// redirect to new urls
+// redirect to new url
 // reference https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections#Temporary_redirections
 // status codes between 300-308
 func (ctx *Ctx) Redirect(statusCode int, url string) error {
 	http.Redirect(ctx.Writer, ctx.Request, url, statusCode)
+	return nil
+}
+
+// Sending attachment
+// filePath
+func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		return err
+	}
+	headerValue := fmt.Sprintf("attachment; filename=%s", fileName)
+	ctx.Writer.Header().Set("Content-Disposition", headerValue)
+	_, err = ctx.Writer.Write(content)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

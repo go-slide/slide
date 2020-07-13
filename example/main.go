@@ -43,6 +43,10 @@ func main() {
 	//	return ctx.Send(http.StatusOK, "Hello, World!")
 	//})
 
+	app.Get("/download", func(ctx *ferry.Ctx) error {
+		return ctx.SendAttachment("server.go", "server.go")
+	})
+
 	app.Get("/login", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World!, This is login")
 	})
