@@ -26,6 +26,8 @@ type group struct {
 var (
 	get  = "GET"
 	post = "POST"
+	put = "PUT"
+	delete = "DELETE"
 )
 
 var routerRegexReplace = "[a-zA-Z0-9_-]*"
@@ -48,6 +50,16 @@ func (g *group) Get(path string, h handler) {
 // Post method of ferry
 func (g *group) Post(path string, h handler) {
 	g.addRoute(post, path, h)
+}
+
+// Put method of ferry
+func (g *group) Put(path string, h handler) {
+	g.addRoute(put, path, h)
+}
+
+// Delete method of ferry
+func (g *group) Delete(path string, h handler) {
+	g.addRoute(delete, path, h)
 }
 
 func (g *group) Use(h handler) {

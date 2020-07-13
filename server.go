@@ -55,6 +55,16 @@ func (ferry *Ferry) Post(path string, h handler) {
 	ferry.addRoute(post, path, h)
 }
 
+// Put method of ferry
+func (ferry *Ferry) Put(path string, h handler) {
+	ferry.addRoute(put, path, h)
+}
+
+// Delete method of ferry
+func (ferry *Ferry) Delete(path string, h handler) {
+	ferry.addRoute(delete, path, h)
+}
+
 // Group method
 func (ferry *Ferry) Group(path string) *group {
 	return &group{

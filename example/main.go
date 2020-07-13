@@ -44,6 +44,14 @@ func main() {
 		return ctx.Send(http.StatusOK, "Heey!")
 	})
 
+	app.Put("/heyput", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "heyPut")
+	})
+
+	app.Delete("/heydelete", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "heyDelete")
+	})
+
 	app.Post("/login", func(ctx *ferry.Ctx) error {
 		login := Login{}
 		err := ctx.Bind(&login)
@@ -57,8 +65,14 @@ func main() {
 
 	// group routing
 	auth := app.Group("/auth")
+	auth.Delete("/authdelete", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "authdelete")
+	})
+	auth.Put("/authput", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "authput")
+	})
 	auth.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("this is auth level middleware")
+		//fmt.Println("this is auth level middleware")
 		return ctx.Next()
 	})
 
@@ -85,7 +99,7 @@ func main() {
 
 	dashBoard := app.Group("/dashboard")
 	dashBoard.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("dashboard")
+		//fmt.Println("dashboard")
 		return ctx.Next()
 	})
 	dashBoard.Get("/all", func(ctx *ferry.Ctx) error {
@@ -94,7 +108,7 @@ func main() {
 	// nested routes
 	dashboardPrivate := dashBoard.Group("/private")
 	dashboardPrivate.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("dashboard private")
+		//fmt.Println("dashboard private")
 		return ctx.Next()
 	})
 	dashboardPrivate.Get("/all", func(ctx *ferry.Ctx) error {
