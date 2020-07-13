@@ -1,15 +1,16 @@
 package ferry
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
 type Ctx struct {
 	Writer               http.ResponseWriter
+	GzipWriter           *gzip.Writer
 	Request              *http.Request
 	Context              context.Context
 	Next                 func() error
@@ -23,18 +24,25 @@ type Ctx struct {
 func (ctx *Ctx) Json(statusCode int, payload interface{}) error {
 	ctx.Writer.Header().Set("Content-Type", "application/json")
 	ctx.Writer.WriteHeader(statusCode)
-	lol, err := json.Marshal(payload)
+	response, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprint(ctx.Writer, string(lol))
+	if ctx.GzipWriter != nil {
+		_, err = ctx.GzipWriter.Write(response)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	_, err = ctx.Writer.Write(response)
 	return err
 }
 
 // Sending a text response
 func (ctx *Ctx) Send(statusCode int, payload string) error {
 	ctx.Writer.WriteHeader(statusCode)
-	_, err := fmt.Fprint(ctx.Writer, payload)
+	_, err := ctx.Writer.Write([]byte(payload))
 	return err
 }
 
