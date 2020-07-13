@@ -24,9 +24,9 @@ type group struct {
 }
 
 var (
-	get  = "GET"
-	post = "POST"
-	put = "PUT"
+	get    = "GET"
+	post   = "POST"
+	put    = "PUT"
 	delete = "DELETE"
 )
 
@@ -76,9 +76,15 @@ func (g *group) Group(path string) *group {
 }
 
 // handler 404
-func handle404(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
-	_, _ = fmt.Fprint(w, "Check URL")
+func handle404(ferry *Ferry, ctx *Ctx) {
+	if ferry.urlNotFoundHandler != nil {
+		if err := ferry.urlNotFoundHandler(ctx); err != nil {
+			handlerRouterError(err, ctx.Writer)
+		}
+		return
+	}
+	ctx.Writer.WriteHeader(http.StatusNotFound)
+	_, _ = fmt.Fprint(ctx.Writer, "Not found")
 }
 
 func handlerRouterError(err error, w http.ResponseWriter) {
@@ -93,7 +99,7 @@ func handleRouting(ferry *Ferry, ctx *Ctx) {
 		groupLevelMiddleware(ctx, ferry, routesByMethod)
 	} else {
 		// run 404
-		handle404(ctx.Writer)
+		handle404(ferry, ctx)
 	}
 
 }
@@ -136,7 +142,7 @@ func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 			return
 		}
 	}
-	handle404(ctx.Writer)
+	handle404(ferry, ctx)
 }
 
 // routerPath /auth/:name

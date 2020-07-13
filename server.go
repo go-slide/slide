@@ -11,6 +11,7 @@ type Ferry struct {
 	routerMap          map[string][]router
 	middleware         []handler
 	groupMiddlewareMap map[string][]handler
+	urlNotFoundHandler handler
 }
 
 // Init server
@@ -73,15 +74,20 @@ func (ferry *Ferry) Group(path string) *group {
 	}
 }
 
+// custom 404 handler
+func (ferry *Ferry) HandleNotFound(h handler) {
+	ferry.urlNotFoundHandler = h
+}
+
 // Serving
-func (ferry *Ferry) ServeFile (path, fileName string) {
+func (ferry *Ferry) ServeFile(path, fileName string) {
 	ferry.Get(path, func(ctx *Ctx) error {
 		http.ServeFile(ctx.Writer, ctx.Request, fileName)
 		return nil
 	})
 }
 
-func (ferry *Ferry) ServerDir (path, dir string)  {
+func (ferry *Ferry) ServerDir(path, dir string) {
 	var paths []string
 	if err := getAllPaths(dir, &paths); err != nil {
 		panic(err)
