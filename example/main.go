@@ -47,6 +47,10 @@ func main() {
 		return ctx.SendAttachment("server.go", "server.go")
 	})
 
+	app.Post("/upload", func(ctx *ferry.Ctx) error {
+		return ctx.UploadFile("static/index.html", "index")
+	})
+
 	app.Get("/login", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World!, This is login")
 	})
