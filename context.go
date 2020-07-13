@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -73,6 +74,29 @@ func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// uploads file to given path
+func (ctx *Ctx) UploadFile(filePath, fileName string) error {
+	if err:= ctx.Request.ParseForm(); err != nil {
+		return err
+	}
+	defer ctx.Request.Body.Close()
+	file, _, err := ctx.Request.FormFile(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	out, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, file)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
 	return nil
 }
 
