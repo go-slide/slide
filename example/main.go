@@ -20,6 +20,13 @@ func main() {
 		Validator: validate,
 	}
 	app := ferry.InitServer(&config)
+
+	notFoundHandler := func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusNotFound, "Check the URL")
+	}
+
+	app.HandleNotFound(notFoundHandler)
+
 	//app.Use(middleware.Gzip())
 
 	//app.Use(func(ctx *ferry.Ctx) error {
