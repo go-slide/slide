@@ -2,8 +2,9 @@ package ferry
 
 import (
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"strings"
+
+	"github.com/valyala/fasthttp"
 )
 
 type Ferry struct {
@@ -85,7 +86,7 @@ func (ferry *Ferry) HandleNotFound(h handler) {
 }
 
 // Serving
-func (ferry *Ferry) ServeFile(path, filePath, contentType string) {
+func (ferry *Ferry) serveFile(path, filePath, contentType string) {
 	ferry.Get(path, func(ctx *Ctx) error {
 		ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
 		return ctx.RequestCtx.Response.SendFile(filePath)
@@ -102,7 +103,7 @@ func (ferry *Ferry) ServerDir(path, dir string) {
 	if err != nil {
 		panic(err)
 	}
-	ferry.ServeFile(path, indexFile, indexFileContentType)
+	ferry.serveFile(path, indexFile, indexFileContentType)
 	for _, p := range paths {
 		// replace dir name
 		fileRoutePath := strings.Replace(p, dir, "", 1)
@@ -110,6 +111,15 @@ func (ferry *Ferry) ServerDir(path, dir string) {
 		if err != nil {
 			panic(err)
 		}
-		ferry.ServeFile(fileRoutePath, p, contentType)
+		ferry.serveFile(fileRoutePath, p, contentType)
 	}
+}
+
+// ServeFile -- serving single file
+func (ferry *Ferry) ServeFile(path, filePath string) {
+	contentType, err := getFileContentType(filePath)
+	if err != nil {
+		panic(err)
+	}
+	ferry.serveFile(path, filePath, contentType)
 }
