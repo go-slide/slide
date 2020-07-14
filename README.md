@@ -101,4 +101,4 @@ func main() {
 ```
 
 ## Benchmarks
-![](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-MC84pmgzclFNXgPzAp1%2F-MCCflJfVZuPE9kJX7aK%2F-MCCgwNPkanHn3dIl7ua%2Fferryvsfibervsecho.png)
+![](https://i.ibb.co/TWdgzB8/ferry-benchmark.png)
