@@ -1,4 +1,4 @@
-module ferry
+module github.com/ferry-go/ferry
 
 go 1.13
 
