@@ -1,10 +1,11 @@
 package main
 
 import (
-	"ferry"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/ferry-go/ferry"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -36,5 +37,5 @@ func main() {
 		})
 	})
 
-	log.Fatal(app.Listen("localhost:3000"))
+	log.Fatal(app.Listen("localhost:4321"))
 }
