@@ -28,6 +28,6 @@ func getAllPaths(dirPath string, paths *[]string) error {
 }
 
 func getFileContentType(path string) (string, error) {
-	m:= mime.TypeByExtension(filepath.Ext(path))
+	m := mime.TypeByExtension(filepath.Ext(path))
 	return m, nil
 }

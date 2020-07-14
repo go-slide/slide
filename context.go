@@ -1,17 +1,16 @@
 package ferry
 
 import (
-	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/valyala/fasthttp"
 )
 
 type Ctx struct {
-	GzipWriter           *gzip.Writer
 	RequestCtx           *fasthttp.RequestCtx
 	Next                 func() error
 	config               *Config
@@ -20,7 +19,7 @@ type Ctx struct {
 	routerPath           string
 }
 
-// Sending application/json response
+// Json Sending application/json response
 func (ctx *Ctx) Json(statusCode int, payload interface{}) error {
 	ctx.RequestCtx.Response.Header.Set("Content-Type", "application/json")
 	ctx.RequestCtx.SetStatusCode(statusCode)
@@ -28,25 +27,18 @@ func (ctx *Ctx) Json(statusCode int, payload interface{}) error {
 	if err != nil {
 		return err
 	}
-	if ctx.GzipWriter != nil {
-		_, err = ctx.GzipWriter.Write(response)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
 	ctx.RequestCtx.SetBody(response)
 	return nil
 }
 
-// Sending a text response
+// Send Sending a text response
 func (ctx *Ctx) Send(statusCode int, payload string) error {
 	ctx.RequestCtx.SetStatusCode(statusCode)
 	ctx.RequestCtx.SetBody([]byte(payload))
 	return nil
 }
 
-// redirect to new url
+// Redirect to new url
 // reference https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections#Temporary_redirections
 // status codes between 300-308
 func (ctx *Ctx) Redirect(statusCode int, url string) error {
@@ -54,8 +46,7 @@ func (ctx *Ctx) Redirect(statusCode int, url string) error {
 	return nil
 }
 
-// Sending attachment
-// filePath
+// SendAttachment Sending attachment
 func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -65,13 +56,18 @@ func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
 	if err != nil {
 		return err
 	}
+	contentType, err := getFileContentType(filePath)
+	if err != nil {
+		panic(err)
+	}
+	ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
 	headerValue := fmt.Sprintf("attachment; filename=%s", fileName)
 	ctx.RequestCtx.Response.Header.Set("Content-Disposition", headerValue)
 	ctx.RequestCtx.SetBody(content)
 	return nil
 }
 
-// uploads file to given path
+// UploadFile uploads file to given path
 func (ctx *Ctx) UploadFile(filePath, fileName string) error {
 	form, err := ctx.RequestCtx.FormFile(fileName)
 	if err != nil {
@@ -94,7 +90,7 @@ func (ctx *Ctx) UploadFile(filePath, fileName string) error {
 	return nil
 }
 
-// Deserialize body to struct
+// Bind Deserialize body to struct
 func (ctx *Ctx) Bind(input interface{}) error {
 	body := ctx.RequestCtx.Request.Body()
 	if err := json.Unmarshal(body, input); err != nil {
@@ -108,10 +104,28 @@ func (ctx *Ctx) Bind(input interface{}) error {
 	return nil
 }
 
+// GetParam - Getting path param
+//
+// /name/:name
+//
+// /name/ferry
+//
+// name := ctx.GetParam("name")
+//
+// name = ferry
+//
 func (ctx *Ctx) GetParam(name string) string {
 	return extractParamFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()), name)
 }
 
+// GetParams returns map of path params
+//
+// routerPath /auth/:name/:age
+//
+// requestPath /auth/madhuri/32
+//
+// returns { name: madhuri, age: 32 }
+//
 func (ctx *Ctx) GetParams() map[string]string {
 	return getParamsFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()))
 }
