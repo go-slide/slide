@@ -4,6 +4,7 @@
 ```cmd
 go get -u github.com/ferry-go/ferry
 ```
+**Not Production ready**
 
 ## Example
 
