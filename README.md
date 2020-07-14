@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ferry-go/ferry/middleware"
 	"log"
 	"net/http"
 
@@ -28,6 +29,15 @@ func main() {
 	}
 
 	app := ferry.InitServer(&config)
+
+	// compression middleware
+	app.Use(middleware.Compress())
+
+	// you can multiple middlewares also
+	app.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("this will run for all URL(s)")
+		return ctx.Next()
+	})
 
 	app.Get("/", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World")
@@ -56,6 +66,11 @@ func main() {
 
 	// Grouping your route
 	auth := app.Group("/auth")
+	// you can multiple middlewares also
+	auth.Use(func(ctx *ferry.Ctx) error {
+		fmt.Println("this will run for all urls with /auth")
+		return ctx.Next()
+	})
 	auth.Get("/login", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World")
 	})
