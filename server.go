@@ -2,7 +2,7 @@ package ferry
 
 import (
 	"fmt"
-	"net/http"
+	"github.com/valyala/fasthttp"
 	"strings"
 )
 
@@ -25,11 +25,16 @@ func InitServer(config *Config) *Ferry {
 }
 
 func (ferry *Ferry) Listen(host string) error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ctx := getRouterContext(w, r, ferry)
+	requestHandler := func(c *fasthttp.RequestCtx) {
+		ctx := getRouterContext(c, ferry)
 		appLevelMiddleware(ctx, ferry)
-	})
-	return http.ListenAndServe(host, nil)
+	}
+	server := &fasthttp.Server{
+		NoDefaultServerHeader: true,
+		Handler: requestHandler,
+
+	}
+	return server.ListenAndServe(host)
 }
 
 func (ferry *Ferry) addRoute(method, path string, h handler) {
@@ -80,10 +85,10 @@ func (ferry *Ferry) HandleNotFound(h handler) {
 }
 
 // Serving
-func (ferry *Ferry) ServeFile(path, fileName string) {
+func (ferry *Ferry) ServeFile(path, filePath, contentType string) {
 	ferry.Get(path, func(ctx *Ctx) error {
-		http.ServeFile(ctx.Writer, ctx.Request, fileName)
-		return nil
+		ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
+		return ctx.RequestCtx.Response.SendFile(filePath)
 	})
 }
 
@@ -92,14 +97,19 @@ func (ferry *Ferry) ServerDir(path, dir string) {
 	if err := getAllPaths(dir, &paths); err != nil {
 		panic(err)
 	}
-	ferry.Get(path, func(ctx *Ctx) error {
-		indexFile := fmt.Sprintf("%s%s", dir, "/index.html")
-		http.ServeFile(ctx.Writer, ctx.Request, indexFile)
-		return nil
-	})
+	indexFile := fmt.Sprintf("%s%s", dir, "/index.html")
+	indexFileContentType, err := getFileContentType(indexFile)
+	if err != nil {
+		panic(err)
+	}
+	ferry.ServeFile(path, indexFile, indexFileContentType)
 	for _, p := range paths {
 		// replace dir name
-		filePath := strings.Replace(p, dir, "", 1)
-		ferry.ServeFile(filePath, p)
+		fileRoutePath := strings.Replace(p, dir, "", 1)
+		contentType, err := getFileContentType(p)
+		if err != nil {
+			panic(err)
+		}
+		ferry.ServeFile(fileRoutePath, p, contentType)
 	}
 }

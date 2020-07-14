@@ -1,21 +1,15 @@
 package middleware
 
 import (
-	"compress/gzip"
 	"ferry"
+	"github.com/valyala/fasthttp"
 )
 
-func Gzip() func(ctx *ferry.Ctx) error {
+func Compress() func(ctx *ferry.Ctx) error {
+	// give user config to use level // TODO
+	compressHandler := fasthttp.CompressHandlerBrotliLevel(func(c *fasthttp.RequestCtx) {}, fasthttp.CompressBrotliBestSpeed, fasthttp.CompressBestSpeed)
 	return func(ctx *ferry.Ctx) error {
-		writer, err := gzip.NewWriterLevel(ctx.Writer, gzip.BestCompression)
-		if err != nil {
-			return err
-		}
-		ctx.Writer.Header().Set("Content-Encoding", "gzip")
-		defer writer.Close()
-		// instead write own writer and implement common function
-		// but will do that later
-		ctx.GzipWriter = writer
+		compressHandler(ctx.RequestCtx)
 		return ctx.Next()
 	}
 }

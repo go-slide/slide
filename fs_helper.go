@@ -2,7 +2,9 @@ package ferry
 
 import (
 	"io/ioutil"
+	"mime"
 	"path"
+	"path/filepath"
 )
 
 func getAllPaths(dirPath string, paths *[]string) error {
@@ -23,4 +25,9 @@ func getAllPaths(dirPath string, paths *[]string) error {
 		}
 	}
 	return nil
+}
+
+func getFileContentType(path string) (string, error) {
+	m:= mime.TypeByExtension(filepath.Ext(path))
+	return m, nil
 }

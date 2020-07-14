@@ -79,22 +79,22 @@ func (g *group) Group(path string) *group {
 func handle404(ferry *Ferry, ctx *Ctx) {
 	if ferry.urlNotFoundHandler != nil {
 		if err := ferry.urlNotFoundHandler(ctx); err != nil {
-			handlerRouterError(err, ctx.Writer)
+			handlerRouterError(err, ctx)
 		}
 		return
 	}
-	ctx.Writer.WriteHeader(http.StatusNotFound)
-	_, _ = fmt.Fprint(ctx.Writer, "Not found")
+	ctx.RequestCtx.Response.SetStatusCode(http.StatusNotFound)
+	ctx.RequestCtx.Response.SetBody([]byte("Not Found, Check URL"))
 }
 
-func handlerRouterError(err error, w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	_, _ = w.Write([]byte(err.Error()))
+func handlerRouterError(err error, ctx *Ctx) {
+	ctx.RequestCtx.Response.SetStatusCode(http.StatusInternalServerError)
+	ctx.RequestCtx.Response.SetBody([]byte(err.Error()))
 }
 
 func handleRouting(ferry *Ferry, ctx *Ctx) {
 	// first get handler by method
-	routesByMethod := ferry.routerMap[ctx.Request.Method]
+	routesByMethod := ferry.routerMap[string(ctx.RequestCtx.Method())]
 	if routesByMethod != nil {
 		groupLevelMiddleware(ctx, ferry, routesByMethod)
 	} else {
@@ -131,13 +131,13 @@ func findAndReplace(path string) string {
 
 // calls actual handler
 func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
-	urlPath := ctx.Request.URL.Path
+	urlPath := string(ctx.RequestCtx.Path())
 	for _, route := range routers {
 		match, _ := regexp.MatchString(route.regexPath, urlPath)
 		if match {
 			ctx.routerPath = route.routerPath
 			if err := route.handler(ctx); err != nil {
-				handlerRouterError(err, ctx.Writer)
+				handlerRouterError(err, ctx)
 			}
 			return
 		}
