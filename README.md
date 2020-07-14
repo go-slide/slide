@@ -1,5 +1,10 @@
 # ferry-go
 
+## Installation
+```cmd
+go get -u github.com/ferry-go/ferry
+```
+
 ## Example
 
 ```go
