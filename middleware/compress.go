@@ -1,8 +1,7 @@
 package middleware
 
 import (
-	"ferry"
-
+	"github.com/ferry-go/ferry"
 	"github.com/valyala/fasthttp"
 )
 
