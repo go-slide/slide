@@ -11,7 +11,7 @@ import (
 
 type ServerSuite struct {
 	suite.Suite
-	 Ferry *Ferry
+	Ferry *Ferry
 }
 
 func (suite *ServerSuite) SetupTest() {
