@@ -25,6 +25,13 @@ func main() {
 
 	app := ferry.InitServer(&config)
 
+	app.HandleNotFound(func(ctx *ferry.Ctx) error {
+		return ctx.Json(http.StatusNotFound, "check url idiot")
+	})
+	app.HandleErrors(func(ctx *ferry.Ctx, err error) error {
+		return ctx.Send(http.StatusInternalServerError, err.Error())
+	})
+
 	// compression middleware
 	app.Use(middleware.Compress())
 
