@@ -51,12 +51,12 @@ func (ferry *Ferry) Listen(host string) error {
 	return server.ListenAndServe(host)
 }
 
-func (ferry *Ferry) addRoute(method, path string, h handler) {
+func (ferry *Ferry) addRoute(method, path string, h []handler) {
 	pathWithRegex := findAndReplace(path)
 	ferry.routerMap[method] = append(ferry.routerMap[method], router{
 		routerPath: path,
 		regexPath:  pathWithRegex,
-		handler:    h,
+		handlers:   h,
 	})
 }
 
@@ -66,22 +66,22 @@ func (ferry *Ferry) Use(h handler) {
 }
 
 // Get method of ferry
-func (ferry *Ferry) Get(path string, h handler) {
+func (ferry *Ferry) Get(path string, h ...handler) {
 	ferry.addRoute(GET, path, h)
 }
 
 // Post method of ferry
-func (ferry *Ferry) Post(path string, h handler) {
+func (ferry *Ferry) Post(path string, h ...handler) {
 	ferry.addRoute(POST, path, h)
 }
 
 // Put method of ferry
-func (ferry *Ferry) Put(path string, h handler) {
+func (ferry *Ferry) Put(path string, h ...handler) {
 	ferry.addRoute(PUT, path, h)
 }
 
 // Delete method of ferry
-func (ferry *Ferry) Delete(path string, h handler) {
+func (ferry *Ferry) Delete(path string, h ...handler) {
 	ferry.addRoute(DELETE, path, h)
 }
 

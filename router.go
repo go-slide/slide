@@ -16,7 +16,7 @@ type errHandler func(ctx *Ctx, err error) error
 type router struct {
 	routerPath string
 	regexPath  string
-	handler    handler
+	handlers   []handler
 }
 
 type group struct {
@@ -35,13 +35,13 @@ var (
 
 var routerRegexReplace = "[a-zA-Z0-9_-]*"
 
-func (g *group) addRoute(method, path string, h handler) {
+func (g *group) addRoute(method, path string, h ...handler) {
 	groupPath := fmt.Sprintf("%s%s", g.path, path)
 	pathWithRegex := findAndReplace(groupPath)
 	g.ferry.routerMap[method] = append(g.ferry.routerMap[method], router{
 		routerPath: groupPath,
 		regexPath:  pathWithRegex,
-		handler:    h,
+		handlers:   h,
 	})
 }
 
@@ -143,18 +143,35 @@ func findAndReplace(path string) string {
 func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 	urlPath := string(ctx.RequestCtx.Path())
 	query := ctx.RequestCtx.QueryArgs()
-	for _, route := range routers {
-		match, _ := regexp.MatchString(route.regexPath, urlPath)
+	var route *router
+	for _, r := range routers {
+		match, _ := regexp.MatchString(r.regexPath, urlPath)
 		if match {
-			ctx.routerPath = route.routerPath
-			ctx.queryPath = query.String()
-			if err := route.handler(ctx); err != nil {
-				handlerRouterError(err, ctx, ferry)
-			}
-			return
+			route = &r
+			break
 		}
 	}
-	handle404(ferry, ctx)
+	if route != nil {
+		ctx.routerPath = route.routerPath
+		ctx.queryPath = query.String()
+		index := 0
+		var next func() error
+		next = func() error {
+			index = index + 1
+			if index <= len(route.handlers)-1 {
+				if err := route.handlers[len(route.handlers)-1-index](ctx); err != nil {
+					handlerRouterError(err, ctx, ferry)
+				}
+			}
+			return nil
+		}
+		ctx.Next = next
+		if err := route.handlers[len(route.handlers)-1-index](ctx); err != nil {
+			handlerRouterError(err, ctx, ferry)
+		}
+	} else {
+		handle404(ferry, ctx)
+	}
 }
 
 // routerPath /auth/:name
