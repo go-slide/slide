@@ -25,7 +25,7 @@ func (suite *ServerSuite) TestGetMethod() {
 	suite.Ferry.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, "hey")
 	})
-	h := suite.Ferry.routerMap[get]
+	h := suite.Ferry.routerMap[GET]
 	if assert.NotNil(suite.T(), h) {
 		assert.Equal(suite.T(), h[0].routerPath, path, "router path should match")
 		regexPath := findAndReplace(path)
@@ -39,7 +39,7 @@ func (suite *ServerSuite) TestGetMethodResponse() {
 	suite.Ferry.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
-	r, err := http.NewRequest(get, "http://test"+path, nil)
+	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
 		res, err := testServer(r, suite.Ferry)
 		if assert.Nil(suite.T(), err) {

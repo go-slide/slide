@@ -10,6 +10,9 @@ import (
 // Middleware/Route Handler
 type handler func(ctx *Ctx) error
 
+// error handler
+type errHandler func(ctx *Ctx, err error) error
+
 type router struct {
 	routerPath string
 	regexPath  string
@@ -24,10 +27,10 @@ type group struct {
 }
 
 var (
-	get    = "GET"
-	post   = "POST"
-	put    = "PUT"
-	delete = "DELETE"
+	GET    = http.MethodGet
+	POST   = http.MethodPost
+	PUT    = http.MethodPut
+	DELETE = http.MethodDelete
 )
 
 var routerRegexReplace = "[a-zA-Z0-9_-]*"
@@ -44,22 +47,22 @@ func (g *group) addRoute(method, path string, h handler) {
 
 // Get method of ferry
 func (g *group) Get(path string, h handler) {
-	g.addRoute(get, path, h)
+	g.addRoute(GET, path, h)
 }
 
 // Post method of ferry
 func (g *group) Post(path string, h handler) {
-	g.addRoute(post, path, h)
+	g.addRoute(POST, path, h)
 }
 
 // Put method of ferry
 func (g *group) Put(path string, h handler) {
-	g.addRoute(put, path, h)
+	g.addRoute(PUT, path, h)
 }
 
 // Delete method of ferry
 func (g *group) Delete(path string, h handler) {
-	g.addRoute(delete, path, h)
+	g.addRoute(DELETE, path, h)
 }
 
 func (g *group) Use(h handler) {
@@ -79,7 +82,7 @@ func (g *group) Group(path string) *group {
 func handle404(ferry *Ferry, ctx *Ctx) {
 	if ferry.urlNotFoundHandler != nil {
 		if err := ferry.urlNotFoundHandler(ctx); err != nil {
-			handlerRouterError(err, ctx)
+			handlerRouterError(err, ctx, ferry)
 		}
 		return
 	}
@@ -87,13 +90,20 @@ func handle404(ferry *Ferry, ctx *Ctx) {
 	ctx.RequestCtx.Response.SetBody([]byte("Not Found, Check URL"))
 }
 
-func handlerRouterError(err error, ctx *Ctx) {
+func handlerRouterError(err error, ctx *Ctx, ferry *Ferry) {
+	if ferry.errorHandler != nil {
+		if handlerError := ferry.errorHandler(ctx, err); handlerError != nil {
+			ctx.RequestCtx.Response.SetStatusCode(http.StatusInternalServerError)
+			ctx.RequestCtx.Response.SetBody([]byte(handlerError.Error()))
+		}
+		return
+	}
 	ctx.RequestCtx.Response.SetStatusCode(http.StatusInternalServerError)
 	ctx.RequestCtx.Response.SetBody([]byte(err.Error()))
 }
 
 func handleRouting(ferry *Ferry, ctx *Ctx) {
-	// first get handler by method
+	// first GET handler by method
 	routesByMethod := ferry.routerMap[string(ctx.RequestCtx.Method())]
 	if routesByMethod != nil {
 		groupLevelMiddleware(ctx, ferry, routesByMethod)
@@ -139,7 +149,7 @@ func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 			ctx.routerPath = route.routerPath
 			ctx.queryPath = query.String()
 			if err := route.handler(ctx); err != nil {
-				handlerRouterError(err, ctx)
+				handlerRouterError(err, ctx, ferry)
 			}
 			return
 		}

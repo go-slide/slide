@@ -18,6 +18,7 @@ type Ferry struct {
 	middleware         []handler
 	groupMiddlewareMap map[string][]handler
 	urlNotFoundHandler handler
+	errorHandler       errHandler
 }
 
 // Init server
@@ -42,6 +43,10 @@ func (ferry *Ferry) Listen(host string) error {
 	server := &fasthttp.Server{
 		NoDefaultServerHeader: true,
 		Handler:               handler,
+		ErrorHandler: func(r *fasthttp.RequestCtx, err error) {
+			ctx := getRouterContext(r, ferry)
+			_ = ferry.errorHandler(ctx, err)
+		},
 	}
 	return server.ListenAndServe(host)
 }
@@ -62,22 +67,22 @@ func (ferry *Ferry) Use(h handler) {
 
 // Get method of ferry
 func (ferry *Ferry) Get(path string, h handler) {
-	ferry.addRoute(get, path, h)
+	ferry.addRoute(GET, path, h)
 }
 
 // Post method of ferry
 func (ferry *Ferry) Post(path string, h handler) {
-	ferry.addRoute(post, path, h)
+	ferry.addRoute(POST, path, h)
 }
 
 // Put method of ferry
 func (ferry *Ferry) Put(path string, h handler) {
-	ferry.addRoute(put, path, h)
+	ferry.addRoute(PUT, path, h)
 }
 
 // Delete method of ferry
 func (ferry *Ferry) Delete(path string, h handler) {
-	ferry.addRoute(delete, path, h)
+	ferry.addRoute(DELETE, path, h)
 }
 
 // Group method
@@ -88,9 +93,14 @@ func (ferry *Ferry) Group(path string) *group {
 	}
 }
 
-// custom 404 handler
+// HandleNotFound custom 404 handler
 func (ferry *Ferry) HandleNotFound(h handler) {
 	ferry.urlNotFoundHandler = h
+}
+
+// HandleErrors Handling errors at application level
+func (ferry *Ferry) HandleErrors(h errHandler) {
+	ferry.errorHandler = h
 }
 
 // Serving
@@ -101,6 +111,7 @@ func (ferry *Ferry) serveFile(path, filePath, contentType string) {
 	})
 }
 
+// ServerDir files as routes
 func (ferry *Ferry) ServerDir(path, dir string) {
 	var paths []string
 	if err := getAllPaths(dir, &paths); err != nil {

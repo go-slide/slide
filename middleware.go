@@ -11,7 +11,7 @@ func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
 			if ctx.appMiddlewareIndex != len(ferry.middleware) {
 				handler := ferry.middleware[ctx.appMiddlewareIndex]
 				if err := handler(ctx); err != nil {
-					handlerRouterError(err, ctx)
+					handlerRouterError(err, ctx, ferry)
 				}
 			} else {
 				// handling request route
@@ -22,7 +22,7 @@ func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
 		handler := ferry.middleware[ctx.appMiddlewareIndex]
 		ctx.Next = next
 		if err := handler(ctx); err != nil {
-			handlerRouterError(err, ctx)
+			handlerRouterError(err, ctx, ferry)
 		}
 	} else {
 		handleRouting(ferry, ctx)
@@ -45,7 +45,7 @@ func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 				if ctx.groupMiddlewareIndex != len(groupMiddlewares) {
 					handler := groupMiddlewares[ctx.groupMiddlewareIndex]
 					if err := handler(ctx); err != nil {
-						handlerRouterError(err, ctx)
+						handlerRouterError(err, ctx, ferry)
 					}
 				}
 				return nil
@@ -54,7 +54,7 @@ func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 			ctx.Next = next
 			handler := groupMiddlewares[ctx.groupMiddlewareIndex]
 			if err := handler(ctx); err != nil {
-				handlerRouterError(err, ctx)
+				handlerRouterError(err, ctx, ferry)
 			}
 		}
 	}
