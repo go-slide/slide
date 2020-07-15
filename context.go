@@ -130,6 +130,16 @@ func (ctx *Ctx) GetParams() map[string]string {
 	return getParamsFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()))
 }
 
+// ServeFile serving file as response
+func (ctx *Ctx) ServeFile(filePath string) error {
+	contentType, err := getFileContentType(filePath)
+	if err != nil {
+		return err
+	}
+	ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
+	return ctx.RequestCtx.Response.SendFile(filePath)
+}
+
 func getRouterContext(r *fasthttp.RequestCtx, ferry *Ferry) *Ctx {
 	return &Ctx{
 		RequestCtx: r,

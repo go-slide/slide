@@ -81,6 +81,10 @@ func main() {
 		return ctx.SendAttachment("static/login.js", "login.js")
 	})
 
+	app.Get("/servefile", func(ctx *ferry.Ctx) error {
+		return ctx.ServeFile("static/index.html")
+	})
+
 	// uploading file
 	app.Post("/upload", func(ctx *ferry.Ctx) error {
 		return ctx.UploadFile("static/login.js", "login.js")
