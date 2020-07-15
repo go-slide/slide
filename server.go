@@ -32,8 +32,7 @@ func (ferry *Ferry) Listen(host string) error {
 	}
 	server := &fasthttp.Server{
 		NoDefaultServerHeader: true,
-		Handler: requestHandler,
-
+		Handler:               requestHandler,
 	}
 	return server.ListenAndServe(host)
 }
