@@ -1,8 +1,13 @@
 package ferry
 
 import (
+	"context"
 	"fmt"
+	"net"
+	"net/http"
 	"strings"
+
+	"github.com/valyala/fasthttp/fasthttputil"
 
 	"github.com/valyala/fasthttp"
 )
@@ -25,14 +30,18 @@ func InitServer(config *Config) *Ferry {
 	}
 }
 
+func requestHandler(c *fasthttp.RequestCtx, ferry *Ferry) {
+	ctx := getRouterContext(c, ferry)
+	appLevelMiddleware(ctx, ferry)
+}
+
 func (ferry *Ferry) Listen(host string) error {
-	requestHandler := func(c *fasthttp.RequestCtx) {
-		ctx := getRouterContext(c, ferry)
-		appLevelMiddleware(ctx, ferry)
+	handler := func(c *fasthttp.RequestCtx) {
+		requestHandler(c, ferry)
 	}
 	server := &fasthttp.Server{
 		NoDefaultServerHeader: true,
-		Handler:               requestHandler,
+		Handler:               handler,
 	}
 	return server.ListenAndServe(host)
 }
@@ -121,4 +130,26 @@ func (ferry *Ferry) ServeFile(path, filePath string) {
 		panic(err)
 	}
 	ferry.serveFile(path, filePath, contentType)
+}
+
+func testServer(req *http.Request, ferry *Ferry) (*http.Response, error) {
+	ln := fasthttputil.NewInmemoryListener()
+	defer ln.Close()
+	go func() {
+		handler := func(c *fasthttp.RequestCtx) {
+			requestHandler(c, ferry)
+		}
+		err := fasthttp.Serve(ln, handler)
+		if err != nil {
+			panic(fmt.Errorf("failed to serve: %v", err))
+		}
+	}()
+	client := http.Client{
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return ln.Dial()
+			},
+		},
+	}
+	return client.Do(req)
 }
