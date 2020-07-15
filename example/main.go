@@ -16,7 +16,6 @@ type Login struct {
 	Password string `json:"password" validate:"required"`
 }
 
-
 func main() {
 	validate := validator.New()
 	config := ferry.Config{
