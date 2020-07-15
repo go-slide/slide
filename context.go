@@ -17,7 +17,7 @@ type Ctx struct {
 	appMiddlewareIndex   int
 	groupMiddlewareIndex int
 	routerPath           string
-	queryPath	 string
+	queryPath            string
 }
 
 // Json Sending application/json response
@@ -131,9 +131,23 @@ func (ctx *Ctx) GetParams() map[string]string {
 	return getParamsFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()))
 }
 
+//	returns value of a single query Param
+//
+//	route path /hello?key=test&value=bbp
+//
+//	keyValue = GetQueryParam(key)
+//
+//	keyValue = test
+
 func (ctx *Ctx) GetQueryParam(name string) string {
 	return getQueryParam(ctx.queryPath, name)
 }
+
+//	returns map of query Params
+//
+//	route path /hello?key=test&value=bbp
+//
+//	returns {key : test, value : bbp}
 
 func (ctx *Ctx) GetQueryParams() map[string]string {
 	return getAllQueryParams(ctx.queryPath)
