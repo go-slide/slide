@@ -3,10 +3,11 @@ package ferry
 import (
 	"context"
 	"fmt"
-	"github.com/valyala/fasthttp/fasthttputil"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/valyala/fasthttp/fasthttputil"
 
 	"github.com/valyala/fasthttp"
 )

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/ferry-go/ferry/middleware"
 	"log"
 	"net/http"
+
+	"github.com/ferry-go/ferry/middleware"
 
 	"github.com/ferry-go/ferry"
 
@@ -56,6 +57,16 @@ func main() {
 		return ctx.Json(http.StatusOK, map[string]string{
 			"message": fmt.Sprintf("Welcome %s", login.Username),
 		})
+	})
+
+	app.Get("/hello", func(ctx *ferry.Ctx) error {
+		params := ctx.GetQueryParams()
+		return ctx.Json(http.StatusOK, params)
+	})
+
+	app.Get("/hello/single", func(ctx *ferry.Ctx) error {
+		params := ctx.GetQueryParam("key")
+		return ctx.Send(http.StatusOK, fmt.Sprintf("key is %s", params))
 	})
 
 	// Grouping your route
