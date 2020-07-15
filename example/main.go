@@ -107,5 +107,16 @@ func main() {
 		return ctx.UploadFile("static/login.js", "login.js")
 	})
 
+	// you can have router level middleware which works in reverse way
+	app.Get("/routermiddleware", func(ctx *ferry.Ctx) error {
+		return ctx.Send(http.StatusOK, "hola!")
+	}, func(ctx *ferry.Ctx) error {
+		fmt.Println("this prints second")
+		return ctx.Next()
+	}, func(ctx *ferry.Ctx) error {
+		fmt.Println("this prints first")
+		return ctx.Next()
+	})
+
 	log.Fatal(app.Listen("localhost:3000"))
 }
