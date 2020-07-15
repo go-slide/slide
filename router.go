@@ -132,10 +132,12 @@ func findAndReplace(path string) string {
 // calls actual handler
 func handleRouter(ctx *Ctx, ferry *Ferry, routers []router) {
 	urlPath := string(ctx.RequestCtx.Path())
+	query := ctx.RequestCtx.QueryArgs()
 	for _, route := range routers {
 		match, _ := regexp.MatchString(route.regexPath, urlPath)
 		if match {
 			ctx.routerPath = route.routerPath
+			ctx.queryPath = query.String()
 			if err := route.handler(ctx); err != nil {
 				handlerRouterError(err, ctx)
 			}
@@ -178,4 +180,29 @@ func getParamsFromPath(routerPath, requestPath string) map[string]string {
 		}
 	}
 	return paramsMap
+}
+
+func getAllQueryParams(querypath string) map[string]string {
+	queryParamsMap := map[string]string{}
+	params := strings.Split(querypath, "&")
+	for _, v := range params {
+		if strings.Contains(v, "=") {
+			pair := strings.Split(v, "=")
+			queryParamsMap[pair[0]] = pair[1]
+		}
+	}
+	return queryParamsMap
+}
+
+func getQueryParam(querypath string, name string) string {
+	params := strings.Split(querypath, "&")
+	for _, v := range params {
+		if strings.Contains(v, "=") {
+			pair := strings.Split(v, "=")
+			if pair[0] == name {
+				return pair[1]
+			}
+		}
+	}
+	return ""
 }

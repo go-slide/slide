@@ -17,6 +17,7 @@ type Ctx struct {
 	appMiddlewareIndex   int
 	groupMiddlewareIndex int
 	routerPath           string
+	queryPath	 string
 }
 
 // Json Sending application/json response
@@ -128,6 +129,14 @@ func (ctx *Ctx) GetParam(name string) string {
 //
 func (ctx *Ctx) GetParams() map[string]string {
 	return getParamsFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()))
+}
+
+func (ctx *Ctx) GetQueryParam(name string) string {
+	return getQueryParam(ctx.queryPath, name)
+}
+
+func (ctx *Ctx) GetQueryParams() map[string]string {
+	return getAllQueryParams(ctx.queryPath)
 }
 
 // ServeFile serving file as response
