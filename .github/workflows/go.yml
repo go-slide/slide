@@ -30,7 +30,7 @@ jobs:
             dep ensure
         fi
     - name: Format
-      run : chmod +x ./format.sh && bash ./format.sh
+      run : chmod +x .github/workflows/scripts/format.sh  && bash .github/workflows/scripts/format.sh
 
     - name: Test
       run: go test -v .
