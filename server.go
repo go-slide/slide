@@ -106,7 +106,7 @@ func (ferry *Ferry) HandleErrors(h errHandler) {
 // Serving
 func (ferry *Ferry) serveFile(path, filePath, contentType string) {
 	ferry.Get(path, func(ctx *Ctx) error {
-		ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
+		ctx.RequestCtx.Response.Header.Set(ContentType, contentType)
 		return ctx.RequestCtx.Response.SendFile(filePath)
 	})
 }

@@ -2,7 +2,6 @@ package ferry
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -22,7 +21,7 @@ type Ctx struct {
 
 // Json Sending application/json response
 func (ctx *Ctx) Json(statusCode int, payload interface{}) error {
-	ctx.RequestCtx.Response.Header.Set("Content-Type", "application/json")
+	ctx.RequestCtx.Response.Header.Set(ContentType, ApplicationJson)
 	ctx.RequestCtx.SetStatusCode(statusCode)
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -48,6 +47,8 @@ func (ctx *Ctx) Redirect(statusCode int, url string) error {
 }
 
 // SendAttachment Sending attachment
+//
+// here fileName is optional
 func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -61,9 +62,9 @@ func (ctx *Ctx) SendAttachment(filePath, fileName string) error {
 	if err != nil {
 		panic(err)
 	}
-	ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
-	headerValue := fmt.Sprintf("attachment; filename=%s", fileName)
-	ctx.RequestCtx.Response.Header.Set("Content-Disposition", headerValue)
+	ctx.RequestCtx.Response.Header.Set(ContentType, contentType)
+	headerValue := getAttachmentHeader(fileName)
+	ctx.RequestCtx.Response.Header.Set(ContentDeposition, headerValue)
 	ctx.RequestCtx.SetBody(content)
 	return nil
 }
@@ -159,7 +160,7 @@ func (ctx *Ctx) ServeFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	ctx.RequestCtx.Response.Header.Set("Content-Type", contentType)
+	ctx.RequestCtx.Response.Header.Set(ContentType, contentType)
 	return ctx.RequestCtx.Response.SendFile(filePath)
 }
 
