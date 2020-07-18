@@ -31,7 +31,7 @@ func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
 
 func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 	path := string(ctx.RequestCtx.Path())
-	// check if path is available in group middleware
+	// check if path is available in Group middleware
 	if len(ferry.groupMiddlewareMap) == 0 {
 		handleRouter(ctx, ferry, routers)
 		return

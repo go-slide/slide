@@ -44,8 +44,14 @@ func (ferry *Ferry) Listen(host string) error {
 		NoDefaultServerHeader: true,
 		Handler:               handler,
 		ErrorHandler: func(r *fasthttp.RequestCtx, err error) {
-			ctx := getRouterContext(r, ferry)
-			_ = ferry.errorHandler(ctx, err)
+			if ferry.errorHandler != nil {
+				ctx := getRouterContext(r, ferry)
+				_ = ferry.errorHandler(ctx, err)
+			} else {
+				// TODO replace it with logger
+				fmt.Println(err.Error())
+			}
+
 		},
 	}
 	return server.ListenAndServe(host)
@@ -86,8 +92,8 @@ func (ferry *Ferry) Delete(path string, h ...handler) {
 }
 
 // Group method
-func (ferry *Ferry) Group(path string) *group {
-	return &group{
+func (ferry *Ferry) Group(path string) *Group {
+	return &Group{
 		path:  path,
 		ferry: ferry,
 	}
