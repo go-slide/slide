@@ -18,14 +18,14 @@ type router struct {
 	handlers   []handler
 }
 
-type group struct {
+type Group struct {
 	path                   string
 	ferry                  *Ferry
 	middleware             []handler
 	middlewareCurrentIndex int
 }
 
-func (g *group) addRoute(method, path string, h ...handler) {
+func (g *Group) addRoute(method, path string, h ...handler) {
 	groupPath := fmt.Sprintf("%s%s", g.path, path)
 	pathWithRegex := findAndReplace(groupPath)
 	g.ferry.routerMap[method] = append(g.ferry.routerMap[method], router{
@@ -36,32 +36,32 @@ func (g *group) addRoute(method, path string, h ...handler) {
 }
 
 // Get method of ferry
-func (g *group) Get(path string, h handler) {
+func (g *Group) Get(path string, h handler) {
 	g.addRoute(GET, path, h)
 }
 
 // Post method of ferry
-func (g *group) Post(path string, h handler) {
+func (g *Group) Post(path string, h handler) {
 	g.addRoute(POST, path, h)
 }
 
 // Put method of ferry
-func (g *group) Put(path string, h handler) {
+func (g *Group) Put(path string, h handler) {
 	g.addRoute(PUT, path, h)
 }
 
 // Delete method of ferry
-func (g *group) Delete(path string, h handler) {
+func (g *Group) Delete(path string, h handler) {
 	g.addRoute(DELETE, path, h)
 }
 
-func (g *group) Use(h handler) {
+func (g *Group) Use(h handler) {
 	g.ferry.groupMiddlewareMap[g.path] = append(g.ferry.groupMiddlewareMap[g.path], h)
 }
 
 // Group method
-func (g *group) Group(path string) *group {
-	return &group{
+func (g *Group) Group(path string) *Group {
+	return &Group{
 		path:       fmt.Sprintf("%s%s", g.path, path),
 		ferry:      g.ferry,
 		middleware: []handler{},
