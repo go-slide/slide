@@ -67,8 +67,8 @@ func TestGetParams(t *testing.T) {
 func TestGetQueryParamsValid(t *testing.T) {
 	queryPath := "key1=value1&key2=value2"
 	expectedValue := map[string]string{
-		"key1" : "value1",
-		"key2" : "value2",
+		"key1": "value1",
+		"key2": "value2",
 	}
 	paramsMap := getAllQueryParams(queryPath)
 	assert.Equal(t, expectedValue, paramsMap)
