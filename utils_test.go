@@ -63,3 +63,44 @@ func TestGetParams(t *testing.T) {
 	}
 	assert.Equal(t, paramsMap, wantedParamsMap)
 }
+
+func TestGetQueryParamsValid(t *testing.T) {
+	queryPath := "key1=value1&key2=value2"
+	expectedValue := map[string]string{
+		"key1" : "value1",
+		"key2" : "value2",
+	}
+	paramsMap := getAllQueryParams(queryPath)
+	assert.Equal(t, expectedValue, paramsMap)
+}
+
+func TestGetQueryParamsEmptyPath(t *testing.T) {
+	queryPath := ""
+	expectedValue := map[string]string{}
+	paramsMap := getAllQueryParams(queryPath)
+	assert.Equal(t, expectedValue, paramsMap)
+}
+
+func TestGetQueryParamValid(t *testing.T) {
+	queryPath := "key1=value1&key2=value2"
+	key := "key1"
+	expectedValue := "value1"
+	result := getQueryParam(queryPath, key)
+	assert.Equal(t, result, expectedValue)
+}
+
+func TestGetQueryParamEmptyPath(t *testing.T) {
+	queryPath := ""
+	key := "key1"
+	expectedValue := ""
+	result := getQueryParam(queryPath, key)
+	assert.Equal(t, result, expectedValue)
+}
+
+func TestGetQueryParamInvalid(t *testing.T) {
+	queryPath := "key1=value1"
+	key := "key2"
+	expectedValue := ""
+	result := getQueryParam(queryPath, key)
+	assert.Equal(t, result, expectedValue)
+}
