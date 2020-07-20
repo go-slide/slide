@@ -37,7 +37,7 @@ func main() {
 
 	// you can multiple middlewares also
 	app.Use(func(ctx *ferry.Ctx) error {
-		fmt.Println("this will run for all URL(s)")
+		fmt.Println("this will run for all URL(s)", string(ctx.RequestCtx.Path()))
 		return ctx.Next()
 	})
 
@@ -111,10 +111,11 @@ func main() {
 	app.Get("/routermiddleware", func(ctx *ferry.Ctx) error {
 		return ctx.Send(http.StatusOK, "hola!")
 	}, func(ctx *ferry.Ctx) error {
-		fmt.Println("this prints second")
+		fmt.Println("this prints second", ctx.RequestCtx.UserValue("lol"))
 		return ctx.Next()
 	}, func(ctx *ferry.Ctx) error {
 		fmt.Println("this prints first")
+		ctx.RequestCtx.SetUserValue("lol", "wtf")
 		return ctx.Next()
 	})
 
