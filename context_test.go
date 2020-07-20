@@ -185,7 +185,7 @@ func createMultipartFormData(suite *ContextSuite, fieldName, filePath string) (b
 
 func (suite *ContextSuite) TestUploadFile() {
 	path := "/hey"
-	dirPath := "static"
+	dirPath := "temp"
 	fileName := "server.go"
 	uploadPath := dirPath + "/" + fileName
 	// first create a folder
