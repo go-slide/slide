@@ -14,6 +14,11 @@ type ServerSuite struct {
 	Ferry *Ferry
 }
 
+type testRoutes struct {
+	path string
+	method string
+}
+
 func (suite *ServerSuite) SetupTest() {
 	config := &Config{}
 	app := InitServer(config)
@@ -21,15 +26,53 @@ func (suite *ServerSuite) SetupTest() {
 }
 
 func (suite *ServerSuite) TestGetMethod() {
-	path := "/hey"
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
-		return ctx.Send(http.StatusOK, "hey")
-	})
-	h := suite.Ferry.routerMap[GET]
-	if assert.NotNil(suite.T(), h) {
-		assert.Equal(suite.T(), h[0].routerPath, path, "router path should match")
-		regexPath := findAndReplace(path)
-		assert.Equal(suite.T(), h[0].regexPath, regexPath, "regex path should match")
+	routes := []testRoutes{
+		{
+			path: "/hey",
+			method: GET,
+		},
+		{
+			path: "/hey/:name",
+			method: POST,
+		},
+		{
+			path: "/hey/:name",
+			method: PUT,
+		},
+		{
+			path: "/hey/:name",
+			method: DELETE,
+		},
+	}
+	for _, testRoute := range routes {
+		if testRoute.method == GET {
+			suite.Ferry.Get(testRoute.path, func(ctx *Ctx) error {
+				return ctx.Send(http.StatusOK, "hey")
+			})
+		}
+		if testRoute.method == POST {
+			suite.Ferry.Post(testRoute.path, func(ctx *Ctx) error {
+				return ctx.Send(http.StatusOK, "hey")
+			})
+		}
+		if testRoute.method == PUT {
+			suite.Ferry.Put(testRoute.path, func(ctx *Ctx) error {
+				return ctx.Send(http.StatusOK, "hey")
+			})
+		}
+		if testRoute.method == DELETE {
+			suite.Ferry.Delete(testRoute.path, func(ctx *Ctx) error {
+				return ctx.Send(http.StatusOK, "hey")
+			})
+		}
+	}
+	for _, testRoute := range routes {
+		h := suite.Ferry.routerMap[testRoute.method]
+		if assert.NotNil(suite.T(), h) {
+			assert.Equal(suite.T(), h[0].routerPath, testRoute.path, "router path should match")
+			regexPath := findAndReplace(testRoute.path)
+			assert.Equal(suite.T(), h[0].regexPath, regexPath, "regex path should match")
+		}
 	}
 }
 

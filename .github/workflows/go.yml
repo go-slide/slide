@@ -33,7 +33,14 @@ jobs:
       run : chmod +x .github/workflows/scripts/format.sh  && bash .github/workflows/scripts/format.sh
 
     - name: Test
-      run: go test -v .
+      run: chmod +x .github/workflows/scripts/test.sh  && bash .github/workflows/scripts/test.sh
 
     - name: Build
       run: go build -v .
+
+    - name: Update CodeCov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage/cover.out
+        fail_ci_if_error: true

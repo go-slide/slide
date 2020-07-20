@@ -1,2 +1,4 @@
 .idea
 static
+*.out
+*.html
