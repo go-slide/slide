@@ -38,6 +38,12 @@ func (ctx *Ctx) Send(statusCode int, payload string) error {
 	return nil
 }
 
+// Send Sending a text response
+func (ctx *Ctx) SendStatusCode(statusCode int) error {
+	ctx.RequestCtx.SetStatusCode(statusCode)
+	return nil
+}
+
 // Redirect to new url
 // reference https://developer.mozilla.org/en-US/docs/Web/HTTP/Redirections#Temporary_redirections
 // status codes between 300-308

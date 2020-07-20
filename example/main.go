@@ -42,7 +42,7 @@ func main() {
 	})
 
 	app.Get("/", func(ctx *ferry.Ctx) error {
-		return ctx.Send(http.StatusOK, "Hello, World")
+		return ctx.SendStatusCode(http.StatusOK)
 	})
 
 	// redirect to new url
@@ -52,7 +52,8 @@ func main() {
 
 	app.Get("/name/:name", func(ctx *ferry.Ctx) error {
 		name := ctx.GetParam("name")
-		return ctx.Send(http.StatusOK, fmt.Sprintf("hello, %s", name))
+		key := ctx.GetQueryParam("ss")
+		return ctx.Send(http.StatusOK, fmt.Sprintf("hello, %s %s", name, key))
 	})
 
 	app.Post("/login", func(ctx *ferry.Ctx) error {
