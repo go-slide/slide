@@ -15,7 +15,7 @@ type RouterSuit struct {
 }
 
 type testGroupRoutes struct {
-	path string
+	path   string
 	method string
 }
 
@@ -29,19 +29,19 @@ func (suite *RouterSuit) TestGetMethod() {
 	groupPath := "/group"
 	routes := []testGroupRoutes{
 		{
-			path: "/hey",
+			path:   "/hey",
 			method: GET,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: POST,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: PUT,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: DELETE,
 		},
 	}
@@ -72,7 +72,7 @@ func (suite *RouterSuit) TestGetMethod() {
 		h := suite.Ferry.routerMap[testRoute.method]
 		if assert.NotNil(suite.T(), h) {
 			assert.Equal(suite.T(), h[0].routerPath, groupPath+testRoute.path, "router path should match")
-			regexPath := findAndReplace(groupPath+testRoute.path)
+			regexPath := findAndReplace(groupPath + testRoute.path)
 			assert.Equal(suite.T(), h[0].regexPath, regexPath, "regex path should match")
 		}
 	}

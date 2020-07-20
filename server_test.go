@@ -15,7 +15,7 @@ type ServerSuite struct {
 }
 
 type testRoutes struct {
-	path string
+	path   string
 	method string
 }
 
@@ -28,19 +28,19 @@ func (suite *ServerSuite) SetupTest() {
 func (suite *ServerSuite) TestGetMethod() {
 	routes := []testRoutes{
 		{
-			path: "/hey",
+			path:   "/hey",
 			method: GET,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: POST,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: PUT,
 		},
 		{
-			path: "/hey/:name",
+			path:   "/hey/:name",
 			method: DELETE,
 		},
 	}
