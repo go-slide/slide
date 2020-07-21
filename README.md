@@ -6,6 +6,7 @@ go get -u github.com/ferry-go/ferry
 
 ```
 [![codecov](https://codecov.io/gh/ferry-go/ferry/branch/master/graph/badge.svg)](https://codecov.io/gh/ferry-go/ferry)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ferry-go/ferry)](https://goreportcard.com/report/github.com/ferry-go/ferry)
 
 ## Example
 
