@@ -1,6 +1,7 @@
 package ferry
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -104,6 +105,57 @@ func (suite *MiddlewareSuite) TestGroupMultiMiddleware() {
 			assert.Equal(suite.T(), res.Header.Get("hey1"), "hey1")
 			assert.Equal(suite.T(), res.Header.Get("hey2"), "hey2")
 			assert.Equal(suite.T(), string(body), response)
+		}
+	}
+}
+
+func (suite *MiddlewareSuite) TestAppLevelMiddlewareError() {
+	path := "/hey"
+	response := "hello, world!"
+	suite.Ferry.Use(func(ctx *Ctx) error {
+		return errors.New("error from middleware")
+	})
+	suite.Ferry.Get(path, func(ctx *Ctx) error {
+		return ctx.Send(http.StatusOK, response)
+	})
+	// first send early response
+	r, err := http.NewRequest(GET, "http://test"+path, nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				suite.T().Error(err)
+			}
+			assert.Equal(suite.T(), res.StatusCode, http.StatusInternalServerError)
+			assert.Equal(suite.T(), string(body), "error from middleware")
+		}
+	}
+}
+
+func (suite *MiddlewareSuite) TestAppLevelMiddlewareMultiError() {
+	path := "/hey"
+	response := "hello, world!"
+	suite.Ferry.Use(func(ctx *Ctx) error {
+		return ctx.Next()
+	})
+	suite.Ferry.Use(func(ctx *Ctx) error {
+		return errors.New("error from middleware")
+	})
+	suite.Ferry.Get(path, func(ctx *Ctx) error {
+		return ctx.Send(http.StatusOK, response)
+	})
+	// first send early response
+	r, err := http.NewRequest(GET, "http://test"+path, nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				suite.T().Error(err)
+			}
+			assert.Equal(suite.T(), res.StatusCode, http.StatusInternalServerError)
+			assert.Equal(suite.T(), string(body), "error from middleware")
 		}
 	}
 }
