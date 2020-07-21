@@ -29,6 +29,8 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
+        go get -u golang.org/x/lint/golint
+
     - name: Format
       run : chmod +x .github/workflows/scripts/format.sh  && bash .github/workflows/scripts/format.sh
 

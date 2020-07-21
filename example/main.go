@@ -26,7 +26,7 @@ func main() {
 	app := ferry.InitServer(&config)
 
 	app.HandleNotFound(func(ctx *ferry.Ctx) error {
-		return ctx.Json(http.StatusNotFound, "check url idiot")
+		return ctx.JSON(http.StatusNotFound, "check url idiot")
 	})
 	app.HandleErrors(func(ctx *ferry.Ctx, err error) error {
 		return ctx.Send(http.StatusInternalServerError, err.Error())
@@ -62,14 +62,14 @@ func main() {
 		if err != nil {
 			return err
 		}
-		return ctx.Json(http.StatusOK, map[string]string{
+		return ctx.JSON(http.StatusOK, map[string]string{
 			"message": fmt.Sprintf("Welcome %s", login.Username),
 		})
 	})
 
 	app.Get("/hello", func(ctx *ferry.Ctx) error {
 		params := ctx.GetQueryParams()
-		return ctx.Json(http.StatusOK, params)
+		return ctx.JSON(http.StatusOK, params)
 	})
 
 	app.Get("/hello/single", func(ctx *ferry.Ctx) error {

@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
+// ...
 const (
 	GET    = http.MethodGet
 	POST   = http.MethodPost
 	PUT    = http.MethodPut
 	DELETE = http.MethodDelete
 
-	// headers
 	ContentType       = "Content-Type"
 	ContentDeposition = "Content-Disposition"
-	ApplicationJson   = "application/json"
+	ApplicationJSON   = "application/json"
 	Attachment        = "attachment"
 
 	routerRegexReplace = "[a-zA-Z0-9_-]*"

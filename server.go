@@ -12,6 +12,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// Ferry -- Ferry config
 type Ferry struct {
 	config             *Config
 	routerMap          map[string][]router
@@ -21,7 +22,7 @@ type Ferry struct {
 	errorHandler       errHandler
 }
 
-// Init server
+// InitServer -- initializing server with ferry config
 func InitServer(config *Config) *Ferry {
 	return &Ferry{
 		config:             config,
@@ -36,6 +37,7 @@ func requestHandler(c *fasthttp.RequestCtx, ferry *Ferry) {
 	appLevelMiddleware(ctx, ferry)
 }
 
+// Listen -- starting server with given host
 func (ferry *Ferry) Listen(host string) error {
 	handler := func(c *fasthttp.RequestCtx) {
 		requestHandler(c, ferry)
@@ -66,7 +68,7 @@ func (ferry *Ferry) addRoute(method, path string, h []handler) {
 	})
 }
 
-// application level middleware
+// Use -- application level middleware
 func (ferry *Ferry) Use(h handler) {
 	ferry.middleware = append(ferry.middleware, h)
 }
