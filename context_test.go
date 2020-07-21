@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -26,7 +27,10 @@ type login struct {
 }
 
 func (suite *ContextSuite) SetupTest() {
-	config := &Config{}
+	validate := validator.New()
+	config := &Config{
+		Validator: validate,
+	}
 	app := InitServer(config)
 	suite.Ferry = app
 }

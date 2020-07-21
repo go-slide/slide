@@ -2,3 +2,4 @@
 static
 *.out
 *.html
+coverage
