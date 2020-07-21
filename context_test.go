@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -12,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -189,7 +190,7 @@ func createMultipartFormData(suite *ContextSuite, fieldName, filePath string) (b
 
 func (suite *ContextSuite) TestUploadFile() {
 	path := "/hey"
-	dirPath := "temp"
+	dirPath := "testTemp"
 	fileName := "server.go"
 	uploadPath := dirPath + "/" + fileName
 	// first create a folder
