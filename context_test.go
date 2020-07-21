@@ -42,7 +42,7 @@ func (suite *ContextSuite) TestJsonResponse() {
 		"user": "ferry",
 	}
 	suite.Ferry.Get(path, func(ctx *Ctx) error {
-		return ctx.Json(http.StatusOK, response)
+		return ctx.JSON(http.StatusOK, response)
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
@@ -56,7 +56,7 @@ func (suite *ContextSuite) TestJsonResponse() {
 			if err != nil {
 				suite.T().Error(err)
 			}
-			assert.Equal(suite.T(), res.Header.Get(ContentType), ApplicationJson)
+			assert.Equal(suite.T(), res.Header.Get(ContentType), ApplicationJSON)
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
 			assert.Equal(suite.T(), body, bytes)
 		}
@@ -86,7 +86,7 @@ func (suite *ContextSuite) TestBind() {
 	suite.Ferry.Post(path, func(ctx *Ctx) error {
 		body := login{}
 		_ = ctx.Bind(&body)
-		return ctx.Json(http.StatusOK, body)
+		return ctx.JSON(http.StatusOK, body)
 	})
 	postBody, _ := json.Marshal(login{
 		Username: "Ferry",

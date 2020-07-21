@@ -18,6 +18,7 @@ type router struct {
 	handlers   []handler
 }
 
+// Group -- router group
 type Group struct {
 	path                   string
 	ferry                  *Ferry
@@ -55,6 +56,7 @@ func (g *Group) Delete(path string, h handler) {
 	g.addRoute(DELETE, path, h)
 }
 
+// Use -- group level middleware
 func (g *Group) Use(h handler) {
 	g.ferry.groupMiddlewareMap[g.path] = append(g.ferry.groupMiddlewareMap[g.path], h)
 }

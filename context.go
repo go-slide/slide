@@ -9,6 +9,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// Ctx -- route level context
 type Ctx struct {
 	RequestCtx           *fasthttp.RequestCtx
 	Next                 func() error
@@ -19,9 +20,9 @@ type Ctx struct {
 	queryPath            string
 }
 
-// Json Sending application/json response
-func (ctx *Ctx) Json(statusCode int, payload interface{}) error {
-	ctx.RequestCtx.Response.Header.Set(ContentType, ApplicationJson)
+// JSON Sending application/json response
+func (ctx *Ctx) JSON(statusCode int, payload interface{}) error {
+	ctx.RequestCtx.Response.Header.Set(ContentType, ApplicationJSON)
 	ctx.RequestCtx.SetStatusCode(statusCode)
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -38,7 +39,7 @@ func (ctx *Ctx) Send(statusCode int, payload string) error {
 	return nil
 }
 
-// Send Sending a text response
+// SendStatusCode -- sending response without any body
 func (ctx *Ctx) SendStatusCode(statusCode int) error {
 	ctx.RequestCtx.SetStatusCode(statusCode)
 	return nil
@@ -138,24 +139,22 @@ func (ctx *Ctx) GetParams() map[string]string {
 	return getParamsFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()))
 }
 
-//	returns value of a single query Param
+// GetQueryParam returns value of a single query Param
 //
 //	route path /hello?key=test&value=bbp
 //
 //	keyValue = GetQueryParam(key)
 //
 //	keyValue = test
-
 func (ctx *Ctx) GetQueryParam(name string) string {
 	return getQueryParam(ctx.queryPath, name)
 }
 
-//	returns map of query Params
+// GetQueryParams returns map of query Params
 //
 //	route path /hello?key=test&value=bbp
 //
 //	returns {key : test, value : bbp}
-
 func (ctx *Ctx) GetQueryParams() map[string]string {
 	return getAllQueryParams(ctx.queryPath)
 }
