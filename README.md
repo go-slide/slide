@@ -7,8 +7,6 @@ go get -u github.com/ferry-go/ferry
 ```
 [![codecov](https://codecov.io/gh/ferry-go/ferry/branch/master/graph/badge.svg)](https://codecov.io/gh/ferry-go/ferry)
 
-**Not Production ready**
-
 ## Example
 
 ```go
