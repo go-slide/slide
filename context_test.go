@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -12,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -211,13 +212,13 @@ func (suite *ContextSuite) TestUploadFile() {
 				if os.IsNotExist(pathError) {
 					assert.Errorf(suite.T(), pathError, "error while upload file for path "+uploadPath)
 				}
-			} else {
-				// delete that file
-				if deleteErr := os.Remove(uploadPath); deleteErr != nil {
-					assert.Errorf(suite.T(), deleteErr, "error while deleting file for path "+uploadPath)
-				}
 			}
 		}
+	}
+	// delete that file
+	deleteErr := os.RemoveAll(dirPath)
+	if deleteErr != nil {
+		assert.Fail(suite.T(), "error while deleting dir", deleteErr.Error())
 	}
 }
 
