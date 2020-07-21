@@ -118,6 +118,7 @@ func (suite *ServerSuite) TestServeFile() {
 	}
 }
 
+
 func TestServer(t *testing.T) {
 	suite.Run(t, new(ServerSuite))
 }
