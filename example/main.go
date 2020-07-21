@@ -12,7 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type Login struct {
+type login struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
@@ -57,7 +57,7 @@ func main() {
 	})
 
 	app.Post("/login", func(ctx *ferry.Ctx) error {
-		login := Login{}
+		login := login{}
 		err := ctx.Bind(&login)
 		if err != nil {
 			return err
