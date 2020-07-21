@@ -96,6 +96,28 @@ func (suite *ServerSuite) TestGetMethodResponse() {
 	}
 }
 
+func (suite *ServerSuite) TestServeDir() {
+	suite.Ferry.ServerDir("/", "example")
+	r, err := http.NewRequest(GET, "http://test/main.go", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
+		}
+	}
+}
+
+func (suite *ServerSuite) TestServeFile() {
+	suite.Ferry.ServeFile("/main", "example/main.go")
+	r, err := http.NewRequest(GET, "http://test/main", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
+		}
+	}
+}
+
 func TestServer(t *testing.T) {
 	suite.Run(t, new(ServerSuite))
 }

@@ -1,6 +1,8 @@
 package ferry
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -137,6 +139,88 @@ func (suite *RouterSuit) TestCustom404Handler() {
 			}
 			assert.Equal(suite.T(), res.StatusCode, http.StatusNotFound)
 			assert.Equal(suite.T(), string(body), notFoundMessage)
+		}
+	}
+}
+
+func (suite *RouterSuit) TestNestedGroup() {
+	group := suite.Ferry.Group("/hey")
+	nestedGroup := group.Group("/hello")
+	nestedGroup.Get("/ferry", func(ctx *Ctx) error {
+		return ctx.SendStatusCode(http.StatusOK)
+	})
+	r, err := http.NewRequest(GET, "http://test/hey/hello/ferry", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
+		}
+	}
+}
+
+func (suite *RouterSuit) TestRouterError() {
+	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+		return errors.New("test error")
+	})
+	r, err := http.NewRequest(GET, "http://test/hey", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				suite.T().Errorf("error while readingn body")
+			}
+			defer res.Body.Close()
+			assert.Equal(suite.T(), res.StatusCode, http.StatusInternalServerError)
+			assert.Equal(suite.T(), string(body), "test error")
+		}
+	}
+}
+
+func (suite *RouterSuit) TestCustomErrorRouter() {
+	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+		return errors.New("test error")
+	})
+	suite.Ferry.HandleErrors(func(ctx *Ctx, err error) error {
+		return ctx.Send(http.StatusInternalServerError, fmt.Sprintf("%s from custom handler", err.Error()))
+	})
+	r, err := http.NewRequest(GET, "http://test/hey", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				suite.T().Errorf("error while readingn body")
+			}
+			defer res.Body.Close()
+			assert.Equal(suite.T(), res.StatusCode, http.StatusInternalServerError)
+			assert.Equal(suite.T(), string(body), "test error from custom handler")
+		}
+	}
+}
+
+func (suite *RouterSuit) TestRouteMiddleware() {
+	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+		return ctx.SendStatusCode(http.StatusOK)
+	}, func(ctx *Ctx) error {
+		// early response from middleware
+		return ctx.Send(http.StatusOK, "response from middleware")
+	}, func(ctx *Ctx) error {
+		ctx.RequestCtx.Response.Header.Set("server", "ferry")
+		return ctx.Next()
+	})
+	r, err := http.NewRequest(GET, "http://test/hey", nil)
+	if assert.Nil(suite.T(), err) {
+		res, err := testServer(r, suite.Ferry)
+		if assert.Nil(suite.T(), err) {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				suite.T().Errorf("error while readingn body")
+			}
+			defer res.Body.Close()
+			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
+			assert.Equal(suite.T(), res.Header.Get("server"), "ferry")
+			assert.Equal(suite.T(), string(body), "response from middleware")
 		}
 	}
 }
