@@ -1,4 +1,4 @@
-module github.com/slide-go/slide
+module github.com/go-slide/slide
 
 go 1.13
 

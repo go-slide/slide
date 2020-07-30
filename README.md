@@ -2,7 +2,7 @@
 
 ## Installation
 ```cmd
-go get -u github.com/slide-go/slide
+go get -u github.com/go-slide/slide
 
 ```
 **Not Production Ready**
@@ -17,11 +17,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/slide-go/slide/middleware"
+	"github.com/go-slide/slide/middleware"
 	"log"
 	"net/http"
 
-	"github.com/slide-go/slide"
+	"github.com/go-slide/slide"
 
 	"github.com/go-playground/validator/v10"
 )
