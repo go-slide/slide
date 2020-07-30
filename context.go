@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"encoding/json"
@@ -117,11 +117,11 @@ func (ctx *Ctx) Bind(input interface{}) error {
 //
 // /name/:name
 //
-// /name/ferry
+// /name/slide
 //
 // name := ctx.GetParam("name")
 //
-// name = ferry
+// name = slide
 //
 func (ctx *Ctx) GetParam(name string) string {
 	return extractParamFromPath(ctx.routerPath, string(ctx.RequestCtx.Path()), name)
@@ -169,9 +169,9 @@ func (ctx *Ctx) ServeFile(filePath string) error {
 	return ctx.RequestCtx.Response.SendFile(filePath)
 }
 
-func getRouterContext(r *fasthttp.RequestCtx, ferry *Ferry) *Ctx {
+func getRouterContext(r *fasthttp.RequestCtx, slide *Slide) *Ctx {
 	return &Ctx{
 		RequestCtx: r,
-		config:     ferry.config,
+		config:     slide.config,
 	}
 }

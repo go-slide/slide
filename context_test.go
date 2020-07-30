@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ import (
 
 type ContextSuite struct {
 	suite.Suite
-	Ferry *Ferry
+	Slide *Slide
 }
 
 type login struct {
@@ -33,20 +33,20 @@ func (suite *ContextSuite) SetupTest() {
 		Validator: validate,
 	}
 	app := InitServer(config)
-	suite.Ferry = app
+	suite.Slide = app
 }
 
 func (suite *ContextSuite) TestJsonResponse() {
 	path := "/hey"
 	response := map[string]string{
-		"user": "ferry",
+		"user": "slide",
 	}
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.JSON(http.StatusOK, response)
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -66,15 +66,15 @@ func (suite *ContextSuite) TestJsonResponse() {
 func (suite *ContextSuite) TestRedirect() {
 	path := "/hey"
 	redirectPath := "/redirect"
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Redirect(http.StatusTemporaryRedirect, redirectPath)
 	})
-	suite.Ferry.Get(redirectPath, func(ctx *Ctx) error {
+	suite.Slide.Get(redirectPath, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, "redirected")
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
 		}
@@ -83,17 +83,17 @@ func (suite *ContextSuite) TestRedirect() {
 
 func (suite *ContextSuite) TestBind() {
 	path := "/hey"
-	suite.Ferry.Post(path, func(ctx *Ctx) error {
+	suite.Slide.Post(path, func(ctx *Ctx) error {
 		body := login{}
 		_ = ctx.Bind(&body)
 		return ctx.JSON(http.StatusOK, body)
 	})
 	postBody, _ := json.Marshal(login{
-		Username: "Ferry",
+		Username: "Slide",
 	})
 	r, err := http.NewRequest(POST, "http://test"+path, strings.NewReader(string(postBody)))
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if assert.Nil(suite.T(), err) {
@@ -106,16 +106,16 @@ func (suite *ContextSuite) TestBind() {
 
 func (suite *ContextSuite) TestParamsAndQueryParams() {
 	path := "/hey/:name"
-	name := "ferry"
+	name := "slide"
 	paramsMap := map[string]string{
 		"name": name,
 	}
 	queryMap := map[string]string{
 		"key":  "value",
-		"name": "ferry",
+		"name": "slide",
 	}
-	requestPath := fmt.Sprintf("/hey/%s?key=value&name=ferry", name)
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	requestPath := fmt.Sprintf("/hey/%s?key=value&name=slide", name)
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		name := ctx.GetParam("name")
 		queryParamName := ctx.GetQueryParam("name")
 
@@ -130,7 +130,7 @@ func (suite *ContextSuite) TestParamsAndQueryParams() {
 	})
 	r, err := http.NewRequest(GET, "http://test"+requestPath, nil)
 	if assert.Nil(suite.T(), err) {
-		_, err := testServer(r, suite.Ferry)
+		_, err := testServer(r, suite.Slide)
 		assert.Nil(suite.T(), err)
 	}
 }
@@ -138,12 +138,12 @@ func (suite *ContextSuite) TestParamsAndQueryParams() {
 func (suite *ContextSuite) TestServeFiles() {
 	path := "/hey"
 	filePath := "server.go"
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.ServeFile(filePath)
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		_, err := testServer(r, suite.Ferry)
+		_, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			fileType, _ := getFileContentType(filePath)
 			assert.Equal(suite.T(), r.Header.Get(ContentType), fileType)
@@ -155,12 +155,12 @@ func (suite *ContextSuite) TestServeFiles() {
 func (suite *ContextSuite) TestSendAttachment() {
 	path := "/hey"
 	filePath := "server.go"
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.SendAttachment(filePath, "server.go")
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		resp, err := testServer(r, suite.Ferry)
+		resp, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			header := getAttachmentHeader("server.go")
 			assert.Equal(suite.T(), resp.Header.Get(ContentDeposition), header)
@@ -198,14 +198,14 @@ func (suite *ContextSuite) TestUploadFile() {
 		err = os.Mkdir(dirPath, os.ModeDir)
 		suite.NotNil(suite.T(), err)
 	}
-	suite.Ferry.Post(path, func(ctx *Ctx) error {
+	suite.Slide.Post(path, func(ctx *Ctx) error {
 		return ctx.UploadFile(uploadPath, fileName)
 	})
 	buffer, multiWriter := createMultipartFormData(suite, fileName, fileName)
 	r, err := http.NewRequest(POST, "http://test"+path, &buffer)
 	if assert.Nil(suite.T(), err) {
 		r.Header.Set("Content-Type", multiWriter.FormDataContentType())
-		_, err := testServer(r, suite.Ferry)
+		_, err := testServer(r, suite.Slide)
 		assert.Nil(suite.T(), err)
 		if assert.Nil(suite.T(), err) {
 			if _, pathError := os.Stat(uploadPath); pathError != nil {

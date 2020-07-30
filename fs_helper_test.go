@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"github.com/stretchr/testify/assert"

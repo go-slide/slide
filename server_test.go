@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"io/ioutil"
@@ -11,7 +11,7 @@ import (
 
 type ServerSuite struct {
 	suite.Suite
-	Ferry *Ferry
+	Slide *Slide
 }
 
 type testRoutes struct {
@@ -22,7 +22,7 @@ type testRoutes struct {
 func (suite *ServerSuite) SetupTest() {
 	config := &Config{}
 	app := InitServer(config)
-	suite.Ferry = app
+	suite.Slide = app
 }
 
 func (suite *ServerSuite) TestGetMethod() {
@@ -46,28 +46,28 @@ func (suite *ServerSuite) TestGetMethod() {
 	}
 	for _, testRoute := range routes {
 		if testRoute.method == GET {
-			suite.Ferry.Get(testRoute.path, func(ctx *Ctx) error {
+			suite.Slide.Get(testRoute.path, func(ctx *Ctx) error {
 				return ctx.Send(http.StatusOK, "hey")
 			})
 		}
 		if testRoute.method == POST {
-			suite.Ferry.Post(testRoute.path, func(ctx *Ctx) error {
+			suite.Slide.Post(testRoute.path, func(ctx *Ctx) error {
 				return ctx.Send(http.StatusOK, "hey")
 			})
 		}
 		if testRoute.method == PUT {
-			suite.Ferry.Put(testRoute.path, func(ctx *Ctx) error {
+			suite.Slide.Put(testRoute.path, func(ctx *Ctx) error {
 				return ctx.Send(http.StatusOK, "hey")
 			})
 		}
 		if testRoute.method == DELETE {
-			suite.Ferry.Delete(testRoute.path, func(ctx *Ctx) error {
+			suite.Slide.Delete(testRoute.path, func(ctx *Ctx) error {
 				return ctx.Send(http.StatusOK, "hey")
 			})
 		}
 	}
 	for _, testRoute := range routes {
-		h := suite.Ferry.routerMap[testRoute.method]
+		h := suite.Slide.routerMap[testRoute.method]
 		if assert.NotNil(suite.T(), h) {
 			assert.Equal(suite.T(), h[0].routerPath, testRoute.path, "router path should match")
 			regexPath := findAndReplace(testRoute.path)
@@ -79,12 +79,12 @@ func (suite *ServerSuite) TestGetMethod() {
 func (suite *ServerSuite) TestGetMethodResponse() {
 	path := "/hey"
 	response := "hello, world!"
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -97,10 +97,10 @@ func (suite *ServerSuite) TestGetMethodResponse() {
 }
 
 func (suite *ServerSuite) TestServeDir() {
-	suite.Ferry.ServerDir("/", "example")
+	suite.Slide.ServerDir("/", "example")
 	r, err := http.NewRequest(GET, "http://test/main.go", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
 		}
@@ -108,10 +108,10 @@ func (suite *ServerSuite) TestServeDir() {
 }
 
 func (suite *ServerSuite) TestServeFile() {
-	suite.Ferry.ServeFile("/main", "example/main.go")
+	suite.Slide.ServeFile("/main", "example/main.go")
 	r, err := http.NewRequest(GET, "http://test/main", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
 		}

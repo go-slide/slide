@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ferry-go/ferry/middleware"
+	"github.com/slide-go/slide/middleware"
 
-	"github.com/ferry-go/ferry"
+	"github.com/slide-go/slide"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -19,16 +19,16 @@ type login struct {
 
 func main() {
 	validate := validator.New()
-	config := ferry.Config{
+	config := slide.Config{
 		Validator: validate,
 	}
 
-	app := ferry.InitServer(&config)
+	app := slide.InitServer(&config)
 
-	app.HandleNotFound(func(ctx *ferry.Ctx) error {
+	app.HandleNotFound(func(ctx *slide.Ctx) error {
 		return ctx.JSON(http.StatusNotFound, "check url idiot")
 	})
-	app.HandleErrors(func(ctx *ferry.Ctx, err error) error {
+	app.HandleErrors(func(ctx *slide.Ctx, err error) error {
 		return ctx.Send(http.StatusInternalServerError, err.Error())
 	})
 
@@ -36,27 +36,27 @@ func main() {
 	app.Use(middleware.Compress())
 
 	// you can multiple middlewares also
-	app.Use(func(ctx *ferry.Ctx) error {
+	app.Use(func(ctx *slide.Ctx) error {
 		fmt.Println("this will run for all URL(s)", string(ctx.RequestCtx.Path()))
 		return ctx.Next()
 	})
 
-	app.Get("/", func(ctx *ferry.Ctx) error {
+	app.Get("/", func(ctx *slide.Ctx) error {
 		return ctx.SendStatusCode(http.StatusOK)
 	})
 
 	// redirect to new url
-	app.Get("/redirect", func(ctx *ferry.Ctx) error {
+	app.Get("/redirect", func(ctx *slide.Ctx) error {
 		return ctx.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/static")
 	})
 
-	app.Get("/name/:name", func(ctx *ferry.Ctx) error {
+	app.Get("/name/:name", func(ctx *slide.Ctx) error {
 		name := ctx.GetParam("name")
 		key := ctx.GetQueryParam("ss")
 		return ctx.Send(http.StatusOK, fmt.Sprintf("hello, %s %s", name, key))
 	})
 
-	app.Post("/login", func(ctx *ferry.Ctx) error {
+	app.Post("/login", func(ctx *slide.Ctx) error {
 		login := login{}
 		err := ctx.Bind(&login)
 		if err != nil {
@@ -67,12 +67,12 @@ func main() {
 		})
 	})
 
-	app.Get("/hello", func(ctx *ferry.Ctx) error {
+	app.Get("/hello", func(ctx *slide.Ctx) error {
 		params := ctx.GetQueryParams()
 		return ctx.JSON(http.StatusOK, params)
 	})
 
-	app.Get("/hello/single", func(ctx *ferry.Ctx) error {
+	app.Get("/hello/single", func(ctx *slide.Ctx) error {
 		params := ctx.GetQueryParam("key")
 		return ctx.Send(http.StatusOK, fmt.Sprintf("key is %s", params))
 	})
@@ -80,41 +80,41 @@ func main() {
 	// Grouping your route
 	auth := app.Group("/auth")
 	// you can multiple middlewares also
-	auth.Use(func(ctx *ferry.Ctx) error {
+	auth.Use(func(ctx *slide.Ctx) error {
 		fmt.Println("this will run for all urls with /auth")
 		return ctx.Next()
 	})
-	auth.Get("/login", func(ctx *ferry.Ctx) error {
+	auth.Get("/login", func(ctx *slide.Ctx) error {
 		return ctx.Send(http.StatusOK, "Hello, World")
 	})
 
 	// path and dir name
-	app.ServerDir("/static", "static")
+	// app.ServerDir("/static", "static")
 
 	// single file
-	app.ServeFile("/js", "static/login.js")
+	// app.ServeFile("/js", "static/login.js")
 
 	// Downloading file
-	app.Get("/download", func(ctx *ferry.Ctx) error {
+	app.Get("/download", func(ctx *slide.Ctx) error {
 		return ctx.SendAttachment("static/login.js", "login.js")
 	})
 
-	app.Get("/servefile", func(ctx *ferry.Ctx) error {
+	app.Get("/servefile", func(ctx *slide.Ctx) error {
 		return ctx.ServeFile("static/index.html")
 	})
 
 	// uploading file
-	app.Post("/upload", func(ctx *ferry.Ctx) error {
+	app.Post("/upload", func(ctx *slide.Ctx) error {
 		return ctx.UploadFile("static/login.js", "login.js")
 	})
 
 	// you can have router level middleware which works in reverse way
-	app.Get("/routermiddleware", func(ctx *ferry.Ctx) error {
+	app.Get("/routermiddleware", func(ctx *slide.Ctx) error {
 		return ctx.Send(http.StatusOK, "hola!")
-	}, func(ctx *ferry.Ctx) error {
+	}, func(ctx *slide.Ctx) error {
 		fmt.Println("this prints second", ctx.RequestCtx.UserValue("lol"))
 		return ctx.Next()
-	}, func(ctx *ferry.Ctx) error {
+	}, func(ctx *slide.Ctx) error {
 		fmt.Println("this prints first")
 		ctx.RequestCtx.SetUserValue("lol", "wtf")
 		return ctx.Next()

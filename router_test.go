@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 
 type RouterSuit struct {
 	suite.Suite
-	Ferry *Ferry
+	Slide *Slide
 }
 
 type testGroupRoutes struct {
@@ -24,7 +24,7 @@ type testGroupRoutes struct {
 func (suite *RouterSuit) SetupTest() {
 	config := &Config{}
 	app := InitServer(config)
-	suite.Ferry = app
+	suite.Slide = app
 }
 
 func (suite *RouterSuit) TestGetMethod() {
@@ -47,7 +47,7 @@ func (suite *RouterSuit) TestGetMethod() {
 			method: DELETE,
 		},
 	}
-	group := suite.Ferry.Group(groupPath)
+	group := suite.Slide.Group(groupPath)
 	for _, testRoute := range routes {
 		if testRoute.method == GET {
 			group.Get(testRoute.path, func(ctx *Ctx) error {
@@ -71,7 +71,7 @@ func (suite *RouterSuit) TestGetMethod() {
 		}
 	}
 	for _, testRoute := range routes {
-		h := suite.Ferry.routerMap[testRoute.method]
+		h := suite.Slide.routerMap[testRoute.method]
 		if assert.NotNil(suite.T(), h) {
 			assert.Equal(suite.T(), h[0].routerPath, groupPath+testRoute.path, "router path should match")
 			regexPath := findAndReplace(groupPath + testRoute.path)
@@ -83,13 +83,13 @@ func (suite *RouterSuit) TestGetMethod() {
 func (suite *RouterSuit) TestGetMethodResponse() {
 	path := "/hey"
 	response := "hello, world!"
-	group := suite.Ferry.Group("/group")
+	group := suite.Slide.Group("/group")
 	group.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	r, err := http.NewRequest(GET, "http://test/group"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -104,14 +104,14 @@ func (suite *RouterSuit) TestGetMethodResponse() {
 func (suite *RouterSuit) Test404() {
 	path := "/hey"
 	response := "hello, world!"
-	group := suite.Ferry.Group("/group")
+	group := suite.Slide.Group("/group")
 	group.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	// here we are giving a wrong URL
 	r, err := http.NewRequest(GET, "http://test/groups"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -125,13 +125,13 @@ func (suite *RouterSuit) Test404() {
 
 func (suite *RouterSuit) TestCustom404Handler() {
 	notFoundMessage := "check url"
-	suite.Ferry.HandleNotFound(func(ctx *Ctx) error {
+	suite.Slide.HandleNotFound(func(ctx *Ctx) error {
 		return ctx.Send(http.StatusNotFound, notFoundMessage)
 	})
 	// here we are giving a random path
 	r, err := http.NewRequest(GET, "http://test/random", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -144,14 +144,14 @@ func (suite *RouterSuit) TestCustom404Handler() {
 }
 
 func (suite *RouterSuit) TestNestedGroup() {
-	group := suite.Ferry.Group("/hey")
+	group := suite.Slide.Group("/hey")
 	nestedGroup := group.Group("/hello")
-	nestedGroup.Get("/ferry", func(ctx *Ctx) error {
+	nestedGroup.Get("/slide", func(ctx *Ctx) error {
 		return ctx.SendStatusCode(http.StatusOK)
 	})
-	r, err := http.NewRequest(GET, "http://test/hey/hello/ferry", nil)
+	r, err := http.NewRequest(GET, "http://test/hey/hello/slide", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
 		}
@@ -159,12 +159,12 @@ func (suite *RouterSuit) TestNestedGroup() {
 }
 
 func (suite *RouterSuit) TestRouterError() {
-	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+	suite.Slide.Get("/hey", func(ctx *Ctx) error {
 		return errors.New("test error")
 	})
 	r, err := http.NewRequest(GET, "http://test/hey", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -178,15 +178,15 @@ func (suite *RouterSuit) TestRouterError() {
 }
 
 func (suite *RouterSuit) TestCustomErrorRouter() {
-	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+	suite.Slide.Get("/hey", func(ctx *Ctx) error {
 		return errors.New("test error")
 	})
-	suite.Ferry.HandleErrors(func(ctx *Ctx, err error) error {
+	suite.Slide.HandleErrors(func(ctx *Ctx, err error) error {
 		return ctx.Send(http.StatusInternalServerError, fmt.Sprintf("%s from custom handler", err.Error()))
 	})
 	r, err := http.NewRequest(GET, "http://test/hey", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -200,18 +200,18 @@ func (suite *RouterSuit) TestCustomErrorRouter() {
 }
 
 func (suite *RouterSuit) TestRouteMiddleware() {
-	suite.Ferry.Get("/hey", func(ctx *Ctx) error {
+	suite.Slide.Get("/hey", func(ctx *Ctx) error {
 		return ctx.SendStatusCode(http.StatusOK)
 	}, func(ctx *Ctx) error {
 		// early response from middleware
 		return ctx.Send(http.StatusOK, "response from middleware")
 	}, func(ctx *Ctx) error {
-		ctx.RequestCtx.Response.Header.Set("server", "ferry")
+		ctx.RequestCtx.Response.Header.Set("server", "slide")
 		return ctx.Next()
 	})
 	r, err := http.NewRequest(GET, "http://test/hey", nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -219,7 +219,7 @@ func (suite *RouterSuit) TestRouteMiddleware() {
 			}
 			defer res.Body.Close()
 			assert.Equal(suite.T(), res.StatusCode, http.StatusOK)
-			assert.Equal(suite.T(), res.Header.Get("server"), "ferry")
+			assert.Equal(suite.T(), res.Header.Get("server"), "slide")
 			assert.Equal(suite.T(), string(body), "response from middleware")
 		}
 	}
