@@ -7,7 +7,7 @@ go get -u github.com/slide-go/slide
 ```
 **Not Production Ready**
 
-[![codecov](https://codecov.io/gh/slide-go/slide/branch/master/graph/badge.svg)](https://codecov.io/gh/slide-go/slide)
+[![codecov](https://codecov.io/gh/go-slide/slide/branch/master/graph/badge.svg)](https://codecov.io/gh/go-slide/slide)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slide-go/slide)](https://goreportcard.com/report/github.com/slide-go/slide)
 
 ## Example
