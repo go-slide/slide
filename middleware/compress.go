@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/slide-go/slide"
+	"github.com/go-slide/slide"
 	"github.com/valyala/fasthttp"
 )
 
