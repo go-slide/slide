@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"fmt"
@@ -16,28 +16,28 @@ func TestAttachmentHeader(t *testing.T) {
 
 func TestPathParamRegex(t *testing.T) {
 	pathParam := "/auth/:name"
-	routerParam := "/auth/ferry"
+	routerParam := "/auth/slide"
 	regexParam := findAndReplace(pathParam)
 	assert.MatchRegex(t, routerParam, regexParam)
 }
 
 func TestPathParamRegexAbs(t *testing.T) {
-	pathParam := "/auth/ferry"
-	routerParam := "/auth/ferry"
+	pathParam := "/auth/slide"
+	routerParam := "/auth/slide"
 	regexParam := findAndReplace(pathParam)
 	assert.MatchRegex(t, routerParam, regexParam)
 }
 
 func TestPathParamRegexFail(t *testing.T) {
 	pathParam := "/auth/:name"
-	routerParam := "/auth/ferry/ss"
+	routerParam := "/auth/slide/ss"
 	regexParam := findAndReplace(pathParam)
 	fail, _ := regexp.MatchString(routerParam, regexParam)
 	assert.Equal(t, false, fail)
 }
 
 func TestGetParam(t *testing.T) {
-	name := "ferry"
+	name := "slide"
 	pathParam := "/auth/:name/hello/:age"
 	routerParam := fmt.Sprintf("/auth/%s/hello/%d", name, 1)
 	wantedName := extractParamFromPath(pathParam, routerParam, "name")
@@ -53,7 +53,7 @@ func TestGetParamEmpty(t *testing.T) {
 }
 
 func TestGetParams(t *testing.T) {
-	name := "ferry"
+	name := "slide"
 	pathParam := "/auth/:name/hello/:age"
 	routerParam := fmt.Sprintf("/auth/%s/hello/%d", name, 1)
 	paramsMap := getParamsFromPath(pathParam, routerParam)

@@ -1,42 +1,42 @@
-package ferry
+package slide
 
 import "strings"
 
-func appLevelMiddleware(ctx *Ctx, ferry *Ferry) {
-	if len(ferry.middleware) > 0 {
+func appLevelMiddleware(ctx *Ctx, slide *Slide) {
+	if len(slide.middleware) > 0 {
 		ctx.appMiddlewareIndex = 0
 		var next func() error
 		next = func() error {
 			ctx.appMiddlewareIndex = ctx.appMiddlewareIndex + 1
-			if ctx.appMiddlewareIndex != len(ferry.middleware) {
-				handler := ferry.middleware[ctx.appMiddlewareIndex]
+			if ctx.appMiddlewareIndex != len(slide.middleware) {
+				handler := slide.middleware[ctx.appMiddlewareIndex]
 				if err := handler(ctx); err != nil {
-					handlerRouterError(err, ctx, ferry)
+					handlerRouterError(err, ctx, slide)
 				}
 			} else {
 				// handling request route
-				handleRouting(ferry, ctx)
+				handleRouting(slide, ctx)
 			}
 			return nil
 		}
-		handler := ferry.middleware[ctx.appMiddlewareIndex]
+		handler := slide.middleware[ctx.appMiddlewareIndex]
 		ctx.Next = next
 		if err := handler(ctx); err != nil {
-			handlerRouterError(err, ctx, ferry)
+			handlerRouterError(err, ctx, slide)
 		}
 	} else {
-		handleRouting(ferry, ctx)
+		handleRouting(slide, ctx)
 	}
 }
 
-func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
+func groupLevelMiddleware(ctx *Ctx, slide *Slide, routers []router) {
 	path := string(ctx.RequestCtx.Path())
 	// check if path is available in Group middleware
-	if len(ferry.groupMiddlewareMap) == 0 {
-		handleRouter(ctx, ferry, routers)
+	if len(slide.groupMiddlewareMap) == 0 {
+		handleRouter(ctx, slide, routers)
 		return
 	}
-	for groupPath, groupMiddlewares := range ferry.groupMiddlewareMap {
+	for groupPath, groupMiddlewares := range slide.groupMiddlewareMap {
 		// replace this with wild card
 		if strings.Contains(path, groupPath) && len(groupMiddlewares) > 0 {
 			var next func() error
@@ -45,7 +45,7 @@ func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 				if ctx.groupMiddlewareIndex != len(groupMiddlewares) {
 					handler := groupMiddlewares[ctx.groupMiddlewareIndex]
 					if err := handler(ctx); err != nil {
-						handlerRouterError(err, ctx, ferry)
+						handlerRouterError(err, ctx, slide)
 					}
 				}
 				return nil
@@ -54,9 +54,9 @@ func groupLevelMiddleware(ctx *Ctx, ferry *Ferry, routers []router) {
 			ctx.Next = next
 			handler := groupMiddlewares[ctx.groupMiddlewareIndex]
 			if err := handler(ctx); err != nil {
-				handlerRouterError(err, ctx, ferry)
+				handlerRouterError(err, ctx, slide)
 			}
 		}
 	}
-	handleRouter(ctx, ferry, routers)
+	handleRouter(ctx, slide, routers)
 }

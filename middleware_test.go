@@ -1,4 +1,4 @@
-package ferry
+package slide
 
 import (
 	"errors"
@@ -12,28 +12,28 @@ import (
 
 type MiddlewareSuite struct {
 	suite.Suite
-	Ferry *Ferry
+	Slide *Slide
 }
 
 func (suite *MiddlewareSuite) SetupTest() {
 	config := &Config{}
 	app := InitServer(config)
-	suite.Ferry = app
+	suite.Slide = app
 }
 
 func (suite *MiddlewareSuite) TestAppLevelMiddleware() {
 	path := "/hey"
 	response := "hello, world!"
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, "response from middleware")
 	})
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	// first send early response
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -48,21 +48,21 @@ func (suite *MiddlewareSuite) TestAppLevelMiddleware() {
 func (suite *MiddlewareSuite) TestAppLevelMultiMiddleware() {
 	path := "/hey"
 	response := "hello, world!"
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		ctx.RequestCtx.Response.Header.Set("hey1", "hey1")
 		return ctx.Next()
 	})
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		ctx.RequestCtx.Response.Header.Set("hey2", "hey2")
 		return ctx.Next()
 	})
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	// first send early response
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -80,7 +80,7 @@ func (suite *MiddlewareSuite) TestGroupMultiMiddleware() {
 	path := "/hey"
 	response := "hello, world!"
 	groupPath := "/group"
-	group := suite.Ferry.Group(groupPath)
+	group := suite.Slide.Group(groupPath)
 	group.Use(func(ctx *Ctx) error {
 		ctx.RequestCtx.Response.Header.Set("hey1", "hey1")
 		return ctx.Next()
@@ -95,7 +95,7 @@ func (suite *MiddlewareSuite) TestGroupMultiMiddleware() {
 	// first send early response
 	r, err := http.NewRequest(GET, "http://test"+groupPath+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -112,16 +112,16 @@ func (suite *MiddlewareSuite) TestGroupMultiMiddleware() {
 func (suite *MiddlewareSuite) TestAppLevelMiddlewareError() {
 	path := "/hey"
 	response := "hello, world!"
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		return errors.New("error from middleware")
 	})
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	// first send early response
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
@@ -136,19 +136,19 @@ func (suite *MiddlewareSuite) TestAppLevelMiddlewareError() {
 func (suite *MiddlewareSuite) TestAppLevelMiddlewareMultiError() {
 	path := "/hey"
 	response := "hello, world!"
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		return ctx.Next()
 	})
-	suite.Ferry.Use(func(ctx *Ctx) error {
+	suite.Slide.Use(func(ctx *Ctx) error {
 		return errors.New("error from middleware")
 	})
-	suite.Ferry.Get(path, func(ctx *Ctx) error {
+	suite.Slide.Get(path, func(ctx *Ctx) error {
 		return ctx.Send(http.StatusOK, response)
 	})
 	// first send early response
 	r, err := http.NewRequest(GET, "http://test"+path, nil)
 	if assert.Nil(suite.T(), err) {
-		res, err := testServer(r, suite.Ferry)
+		res, err := testServer(r, suite.Slide)
 		if assert.Nil(suite.T(), err) {
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {

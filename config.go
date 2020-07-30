@@ -1,8 +1,8 @@
-package ferry
+package slide
 
 import "github.com/go-playground/validator/v10"
 
-// Config -- Configuration for ferry
+// Config -- Configuration for slide
 type Config struct {
 	Validator *validator.Validate
 }

@@ -1,4 +1,4 @@
-module github.com/ferry-go/ferry
+module github.com/slide-go/slide
 
 go 1.13
 
