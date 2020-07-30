@@ -2,7 +2,7 @@
 
 ## Installation
 ```cmd
-go get -u github.com/slide-go/slide
+go get -u github.com/go-slide/slide
 
 ```
 **Not Production Ready**
