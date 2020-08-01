@@ -18,6 +18,18 @@ const (
 	ApplicationJSON   = "application/json"
 	Attachment        = "attachment"
 
+	// cors headers
+	HeaderOrigin                        = "Origin"
+	HeaderVary                          = "Vary"
+	HeaderAccessControlAllowOrigin      = "Access-Control-Allow-Origin"
+	HeaderAccessControlAllowMethods     = "Access-Control-Allow-Methods"
+	HeaderAccessControlAllowCredentials = "Access-Control-Allow-Credentials"
+	HeaderAccessControlExposeHeaders    = "Access-Control-Expose-Headers"
+	HeaderAccessControlRequestMethod    = "Access-Control-Request-Method"
+	HeaderAccessControlRequestHeaders   = "Access-Control-Request-Headers"
+	HeaderAccessControlAllowHeaders     = "Access-Control-Allow-Headers"
+	HeaderAccessControlMaxAge           = "Access-Control-Max-Age"
+
 	routerRegexReplace = "[a-zA-Z0-9_-]*"
 
 	// routing error messages
