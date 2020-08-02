@@ -25,6 +25,14 @@ func main() {
 
 	app := slide.InitServer(&config)
 
+	// this is with config
+	app.Use(middleware.CorsWithConfig(middleware.CorsConfig{
+		AllowOrigins: []string{"https://www.postgresqltutorial.com"},
+	}))
+
+	// without config, which uses default config
+	// app.Use(middleware.Cors())
+
 	app.HandleNotFound(func(ctx *slide.Ctx) error {
 		return ctx.JSON(http.StatusNotFound, "check url idiot")
 	})

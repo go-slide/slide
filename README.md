@@ -43,6 +43,11 @@ func main() {
 	// compression middleware
 	app.Use(middleware.Compress())
 
+	// this is with config
+	app.Use(middleware.CorsWithConfig(middleware.CorsConfig{
+		AllowOrigins: []string{"https://www.postgresqltutorial.com"},
+	}))
+
 	// you can multiple middlewares also
 	app.Use(func(ctx *slide.Ctx) error {
 		fmt.Println("this will run for all URL(s)")
