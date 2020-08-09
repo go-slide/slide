@@ -5,13 +5,12 @@
 
 ###### tags: `Go` `Express`
 
-> Slide is one of the fastest framework, built on top of fasthttp. 
+> Slide is one of the fastest frameworks, built on top of fasthttp.
 > People coming form express will feel at home. 
 
 
 ## Motivation
-Whlie playing around with the Go's net/http, one thing that we missed most was the lack of middleware support and the problems it solves. After a little reading we decided to write our own web framework which would solve the issues like middleware support with **next**, handle wide range of files, Upload, Download etc.
-
+While playing around with the Go’s net/http, one thing that we missed most was the lack of middleware support and the problems it solves. After a little reading, we decided to write our own web framework which would solve the issues like middleware support with next, handle a wide range of files, Upload, Download, etc.
 
 **:bulb: **Note:** We are still in experimental stage, would love to hear feedback.**
 
