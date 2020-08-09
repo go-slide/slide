@@ -35,9 +35,9 @@ import (
 
 func main() {
     validate := validator.New()
-	config := slide.Config{
-		Validator: validate,
-	}
+    config := slide.Config{
+	Validator: validate,
+    }
     app := slide.InitServer(&config)
     app.Get("/", func(ctx *slide.Ctx) error {
         return ctx.Send(http.StatusOK, "Hello, World")
@@ -75,14 +75,12 @@ Slide supports wide range of middlewares.
 app := slide.InitServer(&config)
 
 ## Application level
-// you can multiple middlewares also
 app.Use(func(ctx *slide.Ctx) error {
     fmt.Println("this will run for all URL(s)")
     return ctx.Next()
 })
 
 //Group Level
-
 auth := app.Group("/auth")
 auth.Use(func(ctx *slide.Ctx) error {
     fmt.Println("this will run for all /auth URL(s)")
@@ -92,8 +90,7 @@ auth.Get("/login", func(ctx *slide.Ctx) error {
     return ctx.Send(http.StatusOK, "Hello, World")
 })
 
-// Route level
-// you can have router level middleware which works in Right -> Left or Bottom to Top
+// Route level, works in Right -> Left or Bottom to Top
 app.Get("/routermiddleware", func(ctx *slide.Ctx) error {
     return ctx.Send(http.StatusOK, "hola!")
 }, func(ctx *slide.Ctx) error {
