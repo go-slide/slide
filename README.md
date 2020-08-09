@@ -102,7 +102,6 @@ app.Get("/routermiddleware", func(ctx *slide.Ctx) error {
     return ctx.Next()
 }, func(ctx *slide.Ctx) error {
     fmt.Println("this prints first")
-    ctx.RequestCtx.SetUserValue("lol", "wtf")
     return ctx.Next()
 })
 
