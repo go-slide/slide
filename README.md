@@ -12,9 +12,9 @@
 ## Motivation
 Whlie playing around with the Go's net/http, one thing that we missed most was the lack of middleware support and the problems it solves. After a little reading we decided to write our own web framework which would solve the issues like middleware support with **next**, handle wide range of files, Upload, Download etc.
 
-:::info
-:bulb: **Note:** We are still in experimental stage, would love to hear feedback.
-:::
+
+**:bulb: **Note:** We are still in experimental stage, would love to hear feedback.**
+
 
 ### Installation
 ```cmd
