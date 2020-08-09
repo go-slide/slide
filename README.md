@@ -1,4 +1,4 @@
-# Slide, a Go web framework for developers coming from Express. 
+# Slide, a Go web framework for Building API(s)
 
 [![codecov](https://codecov.io/gh/go-slide/slide/branch/master/graph/badge.svg)](https://codecov.io/gh/go-slide/slide)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-slide/slide)](https://goreportcard.com/report/github.com/go-slide/slide)
@@ -111,7 +111,7 @@ app.Get("/routermiddleware", func(ctx *slide.Ctx) error {
 ## Benchmark
 
 ```cmd
-autcannon -c 100 -d 40 -p http://localhost:4321/
+autocannon -c 100 -d 40 -p http://localhost:4321/
 ```
 
 | Framework | No of requests |
